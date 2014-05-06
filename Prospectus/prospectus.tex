@@ -1,0 +1,61 @@
+\documentclass[]{usiinfprospectus}
+\usepackage[all]{xy}
+\input{defs}
+
+% \usepackage[T1]{fontenc}
+% \usepackage{lmodern}
+% \usepackage{lmodern}
+\captionsetup{labelfont={bf}}
+
+\author{Nosheen Zaza}
+
+
+\lstset{language=scala}
+\lstset{mathescape=false}
+
+\title{Composable Data Consistency Policies}
+% \subtitle{The (optional) sub title}
+\versiondate{\today}
+
+\begin{committee}
+%With more than 1 advisor an error is raised...: only 1 advisor is allowed!
+\researchadvisor[Universit\`a della Svizzera Italiana, Switzerland]{Prof.}{Nate}{Nystrom}
+\academicadvisor[Universit\`a della Svizzera Italiana, Switzerland]{Prof.}{Nate}{Nystrom}
+\committeemember[Universit\`a della Svizzera Italiana, Switzerland]{Prof.}{Committee}{Member1}
+\committeemember[Universit\`a della Svizzera Italiana, Switzerland]{Prof.}{Committee}{Member2}
+%\committeemember[Universit\`a della Svizzera Italiana, Switzerland]{Prof.}{Committee}{Member3}
+% \coadvisor[Universit\`a della Svizzera Italiana, Switzerland]{Prof.}{Research}{Co-Advisor1}
+% \coadvisor[Universit\`a della Svizzera Italiana, Switzerland]{Prof.}{Research}{Co-Advisor2}
+%\coadvisor[Universit\`a della Svizzera Italiana, Switzerland]{Prof.}{Research}{Co-Advisor3}
+\phddirector{Prof.}{Stefan}{Wolf}
+\end{committee}
+
+\input{abstract}
+
+\begin{document}
+\maketitle
+
+
+%!TEX root = prospectus.tex
+\section{Introduction and Problem Domain}
+\subsection {Replication and Partitioning}
+
+Data replication and partitioning appear in hardware and software systems at every scale. Consider, on a small scale, the replication of data among caches and main memory, or partitioning program data among objects in objects oriented systems, to be later composed and used as logically meaningful modules. Replicating data across web servers, or partitioning data across tables in a database are some larger scale examples. 
+Both replication and partitioning introduce several challenges to system designers and programmers. A major challenge is the problem of data consistency: that an update to a replica or partition will be propagated correctly to clients of other replicas or partitions. 
+
+\subsection {Correctness of Concurrent Operations}
+The notion of correctness means different things in different contexts, depending on different requirements. Traditionally (mostly before the internet era), correctness meant that systems behave as if all operations were performed serially at one replica or across all partitions, meaning that operations form a total order. examples of consistency models that possess this quality are one-copy serializability [Bernstein et al. 1987]. sequential consistency[Leslie some year] or linearizability[wing some year]. Enforcing a total order on operations occurring within a large distributed system, with many replicas can prove expensive, as well as unnecessary for many applications. In this era of massive, distributed online applications, Weaker models, such as eventual consistency [Sheth et al. 1991] or session consistency[Ref], are the norm not the exception. In fact, common issues in distributed systems, such as loss of data during communication or inavailability of processing nodes makes it challenging to enforce even those weaker models.  Weak consistency models can be found on a much smaller scale, in the absence of replication as well. Class ConcurrentSkipListMap[ref], a part of Java standard library, contains execution paths that do not correspond to any sequential execution, because some carefully characterized operations that lost races are not retired, the consistency of instances is enforced by the semantics of the class.
+
+\subsection{Enforcing and Strengthening Consistency}
+
+Enforcing data consistency requires coordinating update requests, and determining when those updates become visible to clients.  There are several mechanisms for achieving this, depending on the required consistency and performance properties such as hardware level CAS operations, explicit synchronization through locking, transactions… etc.  I want to say here that all these mechanisms must determine what to do on failure of operation, specify the retry policy
+
+
+
+
+% \bibliographystyle{abbrv}
+% \bibliography{../myBibliographyDB}
+
+
+
+\end{document}

@@ -1,0 +1,95 @@
+\usepackage{amsthm}
+% \usepackage{amssymb}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{multicol}
+
+%\usepackage{texnansi}
+%\usepackage{gtamacgeorgia}
+
+
+%\fontencoding{T1}
+%\fontfamily{garamond}
+%\fontseries{m}
+%\fontshape{it}
+%\fontsize{12}{15}
+%\selectfont
+
+%\renewcommand{\encodingdefault}{T1}
+%\renewcommand{\rmdefault}{garamond}
+
+%\addtolength{\itemsep}{-\baselineskip}
+
+\lstdefinelanguage{imp}{
+  morekeywords={%
+          skip,pass,if,then,else,do,while,and,or,not,true,false},
+  otherkeywords={},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]"""
+}[keywords,comments,strings]
+ 
+
+
+\lstdefinelanguage{scala}{
+  morekeywords={%
+          abstract,case,catch,class,def,do,else,extends,%
+          false,final,finally,for,forSome,if,implicit,import,lazy,%
+          match,new,null,object,override,package,private,protected,%
+          return,macro, sealed,super,this,throw,trait,true,try,type,%
+          val,var,while,with,yield},
+  otherkeywords={=>,<-,<\%,<:,>:,\#,@},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]"""
+}[keywords,comments,strings]
+ 
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+ 
+% Default settings for code listings
+\lstset{frame=tb,
+  language=scala,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  numbers=none,
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  frame=none,
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=2
+}
+% \lstdefinestyle{basic}{showstringspaces=false,columns=fullflexible,language=haskell,xleftmargin=1pc,%
+% %basicstyle=\small\bfseries\itshape,%
+% %keywordstyle=\underbar,
+% mathescape=true,%
+% lineskip=-1pt,%
+% keepspaces=true,%
+% %basicstyle=\small\sffamily,%
+% basicstyle=\small\ttfamily,%
+% commentstyle=\mdseries\rmfamily,%
+% %moredelim=**[is][\color{white}]{~}{~}
+% }
+% \lstset{style=basic}
+
+
+\newcommand\stepsone{\longrightarrow}
+\newcommand\bnf{\,\,|\,\,}
+
+\newcommand\later[1]{{\color{dkgreen} {#1}}}
+\newcommand\improve[1]{{\color{gray} {#1}}}
+\newcommand\remove[1]{{\color{mauve} {#1}}}
+\newcommand\comment[1]{{\color{red} {#1}}}
+
