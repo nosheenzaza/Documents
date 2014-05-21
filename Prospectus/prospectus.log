@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.9.19)  18 MAY 2014 17:49
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.9.19)  19 MAY 2014 15:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1155,7 +1155,7 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 Here is how much of TeX's memory you used:
  18674 strings out of 493315
  261428 string characters out of 6137904
- 409180 words of memory out of 5000000
+ 409373 words of memory out of 5000000
  21777 multiletter control sequences out of 15000+600000
  33834 words of font info for 62 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
@@ -1168,7 +1168,7 @@ live/2013/texmf-dist/fonts/type1/mathdesign/mdbch/md-chr8t.pfb></usr/local/texl
 ive/2013/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texliv
 e/2013/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local/texlive/
 2013/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb>
-Output written on prospectus.pdf (2 pages, 77985 bytes).
+Output written on prospectus.pdf (2 pages, 78705 bytes).
 PDF statistics:
  88 PDF objects out of 1000 (max. 8388607)
  75 compressed objects within 1 object stream
