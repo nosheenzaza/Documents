@@ -13,7 +13,7 @@
 \lstset{language=scala}
 \lstset{mathescape=false}
 
-\title{Composable Data Consistency Policies}
+\title{Data Consistency Something}
 % \subtitle{The (optional) sub title}
 \versiondate{\today}
 
@@ -39,35 +39,106 @@
 %!TEX root = prospectus.tex
 \section{Introduction and Problem Domain}
 
+Relaxed data consistency models are being successfully employed in frameworks on which many types of applications can be built. The internet has brought many use-cases where consistency can be relaxed to a great extent. As a motivating example, consider a shopping website that replicates product data. When a client requests a list of all products that have 5-start ratings, it is not necessary to query all replicas in order to get the most up-to-date rating data. In fact, this is not even recommended, as it would cause unnecessary system load, which triggers unwanted delays for a task that is inherently subjective. Real-world use cases include metrics collection and product recommendations at eBay~\cite{Lakshman:2010:CDS:1773912.1773922}, and inbox search at facebook.~\cite{cassandraebay}. Both employ an eventually-consistent~\cite{vogels2009eventually} storage backend.
+
+
+Relaxed consistency is rarely sufficient on its own for the requirements of a complete application. It is often the case that components requiring different consistency policies co-exist and operate. Great care must be taken to ensure correct program semantics in such cases. Continuing from the previous example, consider the case when a client wants to buy an item from the list of items with 5-star ratings. Because the list was not constructed by querying all replicas, it is possible that it includes some items that are no longer in stock. If the programmer forgets to perform query all replicas, to check that the selected item is in stock prior to check out. The client will end up buying a non-existent item. Figure 1 depicts this bad scenario.
+
+
+The problem of maintaining data consistency is not exclusive to distributed systems with explicit replication. It is well known and documented in in concurrent programming literature. On the lowest level possible, data is replicated under the hood among main memory, caches and registers, and maintaining data consistency become the responsibility of the programmer, who must ensure that 
+
+\begin{enumerate}
+	\item His program does not violate consistency.
+	\item The compiler will not reoder his program in a way that violates consistency.
+	\item The CPU will not reorder his program instruction in a way that violates conszistency.
+\end{enumerate}
+
+Many techniques designed to ensure these do not happen. Some can be successfully adapted to a distributed environment. The fact that replication is explicit makes it even a better environment to implement many techniques, and this is a topic for active research.
+
+In this research prospectus, we overview 
+
+
+Unlike distributed applications, multicore applications typically require strong consistency on the application level, even if the underlying model does not provide it. 
+
+The mechanisms cannot delay much, so some techniques that might not be suitable for networked applicatiosn absolutely do not work there, such as transactions. There have been attemps to implement transactional memory, but performance is usually the biggest obstacle. 
+
+On the other hand, there are issues special to distributed systems that also make maintaining consistency hard. You usually do not have to consider, in your multicore application, one core dying down and losing data, or your instructions or data getting lost between wires, these issues are the first things to be thought about when designing a distributed application. packet loss, and servers going down problems are not strange to distributed systems designers. 
+
+
+Cases where information among replicas are not the same are less common that one might think, typically, it would take milliseconds to synchronize information at all replicas~\cite{cockcroft2011benchmarking}, however, with some systems processing millions of requests, rare events do occur, and must be considered when designing a system~\cite{vogels2009eventually}.
+Also, there are cases where we want to ensure not only coherence of information among all replicas, but we also need ordered access.
+
+
+We want to answer the following: How should a programming language be designed to support various levels of application level data consistency in a distributed environment? Throughout programming history, designing programming languages was about detecting common coding practices and coming up with constructs that would encode them more efficiently, as well as protecting the programmers from making common programming mistakes. Java bakes in object locks, the infamous synchronized keyword, as well as volatile. Adding checked exceptions forces the programmer to handle them. Futures in Scala force also enforce handling error by default rather than leaving it as a forgettable option, and also manitest the fact that something will take time, and thus this should be handled. What else can we bake in to support better syntax and protection?
+
+Why Distributed environments? Beause there is many applications of ``lies, damned lies and statistics''~\cite{wiki:lies:mark} on the application level. No hidden replication, and the environment in general is cleaner. 
+
+ 
+\begin{enumerate}
+	\item 
+\end{enumerate}
+
+
+\section{Properties of Distributed Systems}
+Distributed systems exhibit properties, or can benefit from lock-free, wait free algorithms. For example a recent addition to the Apache Cassandra~\cite{lakshman2010cassandra} storayge is light-weight transactions, which are not transactions as used in transactional memory and databases 
 
 
 
 
+A data consistency model is needed whenever multiple copies of data often replicate (note that replication is not the only source of consistency problems)~\cite{adve1996shared}, and access synchronization. Often, underlying systems do not provide strong consistency guarantees, and ensuring consistency is moved to the application layer, examples are CPU architectures[], or eventually consistent systems. Sometime we also want to allow relaxed consistency to improve performance and increase consistency, such in [skip lists], or many distributed applications [ref].
 
+There has been many tools and methodologies to enable users express and enforce consistency. Most used are locks[ref], transactions[ref], recently low-level hardware instructions are being exposed to programmers[ref]. Problem with locks is that they do not compose, and you could aquire too many or too few of them, with transaction is that their overhead cannot be tolerated in many environments, with low-level instructions is that they are hard to use. 
 
+There are many applications to analyse a program and detect races and thus help the programmer to aquire enough locks, transactional memory was being worked on[ref]. Generally these approaches view ensuring consistency as a property of operations, and you should write the operation in a way to ensure required properties of data.
 
+We are interested in another approach with the opposite view, consistency is a property of data, and should be preserved by operations. There are many systems that impose constraints on data to be satisfied, statically or dynamically. [reference some here].
 
+Notable work is atomic sets, where data which we should be accessed serially is marked so, then the compiler takes care and generate the locks. It is still possible to have high-level data races, or just generic data races, if the programmer forgets to merge atomic sets. But this is dependent on the semantics of the program, and computer programs do not understand semantics usually. Anyway attaching consistency to data other than operations has many benefits. the reasoning about data becomes global, there is less redundancy and less room for bugs as operations are ensured to access data in a suitable matter.
 
+This works ok when we want to have  serializability vs mess. But what if we have
+other consistency levels?
 
+There are many problems related to this as well. What are operations in an object-oriented language? What are data boundaries? How to compose effeciently?
 
+Also if we merge two sets, what kind of locks should we aquire for sets with different consistencies?
 
+However the  ideas presented there  are applicable in  distributed environments,
+there is  no data sharing,  there are many  consistency levels that  make sense,
+and the data containers are less messy than objects.
 
+In this work we focus on distributed data stores, and use as an example the Apache Cassandra store. 
 
+Review of such systems and refs.
 
+Operations are clear, reads and writes. 
 
+In this work we focus on managing consistency of replicated data in distributed environments. 
 
+Want to talk about wait free things and delegated isolation.
 
+Bottom line: having data-centric consistency and replication policies, parameterized by possibly load and what not is interesting, and this is what i plan to work on. 
 
+Another bottomer-line: We need to provide better abstractions for data consistency in programming languages and software frameworks. 
 
+\section{Stats of the Art}
+In this section, we briefly overview classic and recent research that cover data consistency. Often the research does not necessarily or explicitly focus on consistency, but we will show how we can benefit and employ various aspects to come up with suitable abstractions. The overviews research can be divided as follows 
+\begin{itemize}
+	\item defining various consistency levels: sql isolation levels yield datasets with certain properties, same for consistency levels for reads and writes in a key-value store, or consistenct definitios for concurrent operations on computer memory. 
+	\item Suitable data abstractions: Regions, objects, actors, tables...
+	\item ensuring that operations do not violate data consistency: by showing that programs with certain properties maintain consistency, such as montonic update, share-nothing, separating local and shared data (loci, actors), showing that programs are deterministic, immutable state. Or with data flow and program analysis techniques. Generally dececting, or enabling the user to express certain data properties that ensure consistency. 
+	\item consistency constructs: memory barriers, locks, transactions...
+	\item consistency and how it affects other program properties: can we parameterize programs somwhat to easily tune consistency vs. other propoerties?
+\end{itemize}
 
+\subsection{Consistency Levels Definitions}
+Because different systems have different requirements for consistency, depending on environment parameters (I need to mention some), there are no unified consistency definitions, even though many similarities exist and they overlap. This makes it harder to imbed generic data consistency constructs that would for every application type. Our research direction is towards creating abstractions for distributed systems, because delays can be tolerated, consistency levels are better defined. We however show other consistency definition work.
 
+\begin{enumerate}
+	\item 
+\end{enumerate}
 
-
-
-
-
-% \bibliographystyle{abbrv}
-% \bibliography{../myBibliographyDB}
+\bibliographystyle{abbrv}
+\bibliography{../NosheenZazaBib}
 
 
 

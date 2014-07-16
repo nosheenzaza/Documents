@@ -1,0 +1,37 @@
+\begin{thebibliography}{1}
+
+\bibitem{adve1996shared}
+S.~V. Adve and K.~Gharachorloo.
+\newblock Shared memory consistency models: A tutorial.
+\newblock {\em computer}, 29(12):66--76, 1996.
+
+\bibitem{cockcroft2011benchmarking}
+A.~Cockcroft and D.~Sheahan.
+\newblock Benchmarking cassandra scalability on aws-over a million writes per
+  second.
+\newblock {\em URL: http://techblog. netflix.
+  com/2011/11/benchmarking-cassandra-scalability-on. html (visited on
+  05/20/2013)}, 2011.
+
+\bibitem{lakshman2010cassandra}
+A.~Lakshman and P.~Malik.
+\newblock Cassandra: a decentralized structured storage system.
+\newblock {\em ACM SIGOPS Operating Systems Review}, 44(2):35--40, 2010.
+
+\bibitem{cassandraebay}
+F.~Qu and A.~Jambhekar.
+\newblock Cassandra at ebay scale.
+\newblock \url{http://www.slideshare.net/planetcassandra/5-feng-qu}, 2013.
+
+\bibitem{vogels2009eventually}
+W.~Vogels.
+\newblock Eventually consistent.
+\newblock {\em Communications of the ACM}, 52(1):40--44, 2009.
+
+\bibitem{wiki:lies:mark}
+Wikipedia.
+\newblock Lies, damned lies, and statistics --- wikipedia{,} the free
+  encyclopedia, 2014.
+\newblock [Online; accessed 14-July-2014].
+
+\end{thebibliography}
