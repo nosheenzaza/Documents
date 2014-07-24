@@ -1,37 +1,186 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
-\bibitem{adve1996shared}
-S.~V. Adve and K.~Gharachorloo.
-\newblock Shared memory consistency models: A tutorial.
-\newblock {\em computer}, 29(12):66--76, 1996.
+\bibitem{agha1985actors}
+G.~A. Agha.
+\newblock Actors: a model of concurrent computation in distributed systems.
+\newblock 1985.
 
-\bibitem{cockcroft2011benchmarking}
-A.~Cockcroft and D.~Sheahan.
-\newblock Benchmarking cassandra scalability on aws-over a million writes per
-  second.
-\newblock {\em URL: http://techblog. netflix.
-  com/2011/11/benchmarking-cassandra-scalability-on. html (visited on
-  05/20/2013)}, 2011.
+\bibitem{alvaro2011consistency}
+P.~Alvaro, N.~Conway, J.~Hellerstein, and W.~R. Marczak.
+\newblock Consistency analysis in bloom: a calm and collected approach.
+\newblock In {\em CIDR}, pages 249--260. Citeseer, 2011.
+
+\bibitem{armstrong1993concurrent}
+J.~Armstrong, R.~Virding, C.~Wikstr{\"o}m, and M.~Williams.
+\newblock Concurrent programming in erlang.
+\newblock 1993.
+
+\bibitem{artho2003high}
+C.~Artho, K.~Havelund, and A.~Biere.
+\newblock High-level data races.
+\newblock {\em Software Testing, Verification and Reliability}, 13(4):207--227,
+  2003.
+
+\bibitem{bernstein2009sql}
+P.~A. Bernstein.
+\newblock Sql isolation levels.
+\newblock In {\em Encyclopedia of Database Systems}, pages 2761--2762.
+  Springer, 2009.
+
+\bibitem{bocchino2009parallel}
+R.~Bocchino, V.~Adve, S.~Adve, and M.~Snir.
+\newblock Parallel programming must be deterministic by default.
+\newblock In {\em Proceedings of the First USENIX conference on Hot topics in
+  parallelism}, pages 4--4. USENIX Association, 2009.
+
+\bibitem{akka}
+J.~Boner.
+\newblock Akka.
+\newblock \url{http://akka.io/}, 2014.
+
+\bibitem{charles2005x10}
+P.~Charles, C.~Grothoff, V.~Saraswat, C.~Donawa, A.~Kielstra, K.~Ebcioglu,
+  C.~Von~Praun, and V.~Sarkar.
+\newblock X10: an object-oriented approach to non-uniform cluster computing.
+\newblock {\em Acm Sigplan Notices}, 40(10):519--538, 2005.
+
+\bibitem{Chong:2008:RAW:1353522.1353528}
+N.~Chong and S.~Ishtiaq.
+\newblock Reasoning about the arm weakly consistent memory model.
+\newblock In {\em Proceedings of the 2008 ACM SIGPLAN Workshop on Memory
+  Systems Performance and Correctness: Held in Conjunction with the Thirteenth
+  International Conference on Architectural Support for Programming Languages
+  and Operating Systems (ASPLOS '08)}, MSPC '08, pages 16--19, New York, NY,
+  USA, 2008. ACM.
+
+\bibitem{clarke2008minimal}
+D.~Clarke, T.~Wrigstad, J.~{\"O}stlund, and E.~B. Johnsen.
+\newblock {\em Minimal ownership for active objects}.
+\newblock Springer, 2008.
+
+\bibitem{dolby2012data}
+J.~Dolby, C.~Hammer, D.~Marino, F.~Tip, M.~Vaziri, and J.~Vitek.
+\newblock A data-centric approach to synchronization.
+\newblock {\em ACM Transactions on Programming Languages and Systems (TOPLAS)},
+  34(1):4, 2012.
+
+\bibitem{x10spec}
+V.~S. et~al.
+\newblock X10 language specification.
+\newblock
+  \url{http://x10.sourceforge.net/documentation/languagespec/x10-latest.pdf},
+  2014.
+
+\bibitem{flanagan2003type}
+C.~Flanagan and S.~Qadeer.
+\newblock A type and effect system for atomicity.
+\newblock In {\em ACM SIGPLAN Notices}, volume~38, pages 338--349. ACM, 2003.
+
+\bibitem{haller2010capabilities}
+P.~Haller and M.~Odersky.
+\newblock Capabilities for uniqueness and borrowing.
+\newblock In {\em ECOOP 2010--Object-Oriented Programming}, pages 354--378.
+  Springer, 2010.
+
+\bibitem{hallerfutures}
+P.~Haller, A.~Prokopec, H.~Miller, V.~Klang, R.~Kuhn, and V.~Jovanovic.
+\newblock Futures and promises.
+\newblock {\em URL http://docs. scala-lang. org/overviews/core/futures. html}.
+
+\bibitem{hastorun2007dynamo}
+D.~Hastorun, M.~Jampani, G.~Kakulapati, A.~Pilchin, S.~Sivasubramanian,
+  P.~Vosshall, and W.~Vogels.
+\newblock Dynamo: Amazon’s highly available key-value store.
+\newblock In {\em In Proc. SOSP}. Citeseer, 2007.
+
+\bibitem{herlihy2008transactional}
+M.~Herlihy and E.~Koskinen.
+\newblock Transactional boosting: a methodology for highly-concurrent
+  transactional objects.
+\newblock In {\em Proceedings of the 13th ACM SIGPLAN Symposium on Principles
+  and practice of parallel programming}, pages 207--216. ACM, 2008.
+
+\bibitem{imam2012integrating}
+S.~M. Imam and V.~Sarkar.
+\newblock Integrating task parallelism with actors.
+\newblock In {\em ACM SIGPLAN Notices}, volume~47, pages 753--772. ACM, 2012.
 
 \bibitem{lakshman2010cassandra}
 A.~Lakshman and P.~Malik.
 \newblock Cassandra: a decentralized structured storage system.
 \newblock {\em ACM SIGOPS Operating Systems Review}, 44(2):35--40, 2010.
 
+\bibitem{liu2008coqa}
+Y.~D. Liu, X.~Lu, and S.~F. Smith.
+\newblock Coqa: Concurrent objects with quantized atomicity.
+\newblock In {\em Compiler Construction}, pages 260--275. Springer, 2008.
+
+\bibitem{marino2009generic}
+D.~Marino and T.~Millstein.
+\newblock A generic type-and-effect system.
+\newblock In {\em Proceedings of the 4th international workshop on Types in
+  language design and implementation}, pages 39--50. ACM, 2009.
+
+\bibitem{muller1999universes}
+P.~M{\"u}ller and A.~Poetzsch-Heffter.
+\newblock Universes: A type system for controlling representation exposure.
+\newblock In {\em Programming Languages and Fundamentals of Programming},
+  volume 263. Fernuniversit{\"a}t Hagen, 1999.
+
+\bibitem{mysql}
+MySQL.
+\newblock Mysql.
+\newblock \url{http://dev.mysql.com/}, 2014.
+
+\bibitem{odersky2004overview}
+M.~Odersky, P.~Altherr, V.~Cremet, B.~Emir, S.~Maneth, S.~Micheloud,
+  N.~Mihaylov, M.~Schinz, E.~Stenman, and M.~Zenger.
+\newblock An overview of the scala programming language.
+\newblock Technical report, 2004.
+
+\bibitem{javamemorymodel}
+Oracle.
+\newblock Threads and locks.
+\newblock
+  \url{http://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.4 },
+  2014.
+
 \bibitem{cassandraebay}
 F.~Qu and A.~Jambhekar.
 \newblock Cassandra at ebay scale.
 \newblock \url{http://www.slideshare.net/planetcassandra/5-feng-qu}, 2013.
+
+\bibitem{redmond2012seven}
+E.~Redmond and J.~R. Wilson.
+\newblock {\em Seven databases in seven weeks: a guide to modern databases and
+  the NoSQL movement}.
+\newblock Pragmatic Bookshelf, 2012.
+
+\bibitem{rentsch1982object}
+T.~Rentsch.
+\newblock Object oriented programming.
+\newblock {\em ACM Sigplan Notices}, 17(9):51--57, 1982.
+
+\bibitem{shavit1997software}
+N.~Shavit and D.~Touitou.
+\newblock Software transactional memory.
+\newblock {\em Distributed Computing}, 10(2):99--116, 1997.
+
+\bibitem{Vaziri:2006:ASC:1111320.1111067}
+M.~Vaziri, F.~Tip, and J.~Dolby.
+\newblock Associating synchronization constraints with data in an
+  object-oriented language.
+\newblock {\em SIGPLAN Not.}, 41(1):334--345, Jan. 2006.
 
 \bibitem{vogels2009eventually}
 W.~Vogels.
 \newblock Eventually consistent.
 \newblock {\em Communications of the ACM}, 52(1):40--44, 2009.
 
-\bibitem{wiki:lies:mark}
-Wikipedia.
-\newblock Lies, damned lies, and statistics --- wikipedia{,} the free
-  encyclopedia, 2014.
-\newblock [Online; accessed 14-July-2014].
+\bibitem{wrigstad2009loci}
+T.~Wrigstad, F.~Pizlo, F.~Meawad, L.~Zhao, and J.~Vitek.
+\newblock Loci: Simple thread-locality for java.
+\newblock In {\em ECOOP 2009--Object-Oriented Programming}, pages 445--469.
+  Springer, 2009.
 
 \end{thebibliography}
