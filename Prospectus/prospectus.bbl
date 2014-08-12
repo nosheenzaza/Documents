@@ -1,5 +1,10 @@
 \begin{thebibliography}{10}
 
+\bibitem{adve1996shared}
+S.~V. Adve and K.~Gharachorloo.
+\newblock Shared memory consistency models: A tutorial.
+\newblock {\em computer}, 29(12):66--76, 1996.
+
 \bibitem{agha1985actors}
 G.~A. Agha.
 \newblock Actors: a model of concurrent computation in distributed systems.
@@ -76,6 +81,12 @@ C.~Flanagan and S.~Qadeer.
 \newblock A type and effect system for atomicity.
 \newblock In {\em ACM SIGPLAN Notices}, volume~38, pages 338--349. ACM, 2003.
 
+\bibitem{gifford1979weighted}
+D.~K. Gifford.
+\newblock Weighted voting for replicated data.
+\newblock In {\em Proceedings of the seventh ACM symposium on Operating systems
+  principles}, pages 150--162. ACM, 1979.
+
 \bibitem{haller2010capabilities}
 P.~Haller and M.~Odersky.
 \newblock Capabilities for uniqueness and borrowing.
@@ -100,6 +111,12 @@ M.~Herlihy and E.~Koskinen.
 \newblock In {\em Proceedings of the 13th ACM SIGPLAN Symposium on Principles
   and practice of parallel programming}, pages 207--216. ACM, 2008.
 
+\bibitem{herlihy1990linearizability}
+M.~P. Herlihy and J.~M. Wing.
+\newblock Linearizability: A correctness condition for concurrent objects.
+\newblock {\em ACM Transactions on Programming Languages and Systems (TOPLAS)},
+  12(3):463--492, 1990.
+
 \bibitem{imam2012integrating}
 S.~M. Imam and V.~Sarkar.
 \newblock Integrating task parallelism with actors.
@@ -110,10 +127,29 @@ A.~Lakshman and P.~Malik.
 \newblock Cassandra: a decentralized structured storage system.
 \newblock {\em ACM SIGOPS Operating Systems Review}, 44(2):35--40, 2010.
 
+\bibitem{lamport1979make}
+L.~Lamport.
+\newblock How to make a multiprocessor computer that correctly executes
+  multiprocess programs.
+\newblock {\em Computers, IEEE Transactions on}, 100(9):690--691, 1979.
+
+\bibitem{concurrentskiplistmap}
+D.~Lea.
+\newblock Source for java.util.concurrent.concurrentskiplistmap.
+\newblock
+  \url{http://fuseyism.com/classpath/doc/java/util/concurrent/ConcurrentSkipListMap-source.html}.
+
 \bibitem{liu2008coqa}
 Y.~D. Liu, X.~Lu, and S.~F. Smith.
 \newblock Coqa: Concurrent objects with quantized atomicity.
 \newblock In {\em Compiler Construction}, pages 260--275. Springer, 2008.
+
+\bibitem{Lucassen:1988:PES:73560.73564}
+J.~M. Lucassen and D.~K. Gifford.
+\newblock Polymorphic effect systems.
+\newblock In {\em Proceedings of the 15th ACM SIGPLAN-SIGACT Symposium on
+  Principles of Programming Languages}, POPL '88, pages 47--57, New York, NY,
+  USA, 1988. ACM.
 
 \bibitem{marino2009generic}
 D.~Marino and T.~Millstein.
@@ -150,6 +186,13 @@ F.~Qu and A.~Jambhekar.
 \newblock Cassandra at ebay scale.
 \newblock \url{http://www.slideshare.net/planetcassandra/5-feng-qu}, 2013.
 
+\bibitem{raynal1995causal}
+M.~Raynal and A.~Schiper.
+\newblock From causal consistency to sequential consistency in shared memory
+  systems.
+\newblock In {\em Foundations of Software Technology and Theoretical Computer
+  Science}, pages 180--194. Springer, 1995.
+
 \bibitem{redmond2012seven}
 E.~Redmond and J.~R. Wilson.
 \newblock {\em Seven databases in seven weeks: a guide to modern databases and
@@ -165,6 +208,21 @@ T.~Rentsch.
 N.~Shavit and D.~Touitou.
 \newblock Software transactional memory.
 \newblock {\em Distributed Computing}, 10(2):99--116, 1997.
+
+\bibitem{terry1994session}
+D.~B. Terry, A.~J. Demers, K.~Petersen, M.~J. Spreitzer, M.~M. Theimer, and
+  B.~B. Welch.
+\newblock Session guarantees for weakly consistent replicated data.
+\newblock In {\em Parallel and Distributed Information Systems, 1994.,
+  Proceedings of the Third International Conference on}, pages 140--149. IEEE,
+  1994.
+
+\bibitem{terry1995managing}
+D.~B. Terry, M.~M. Theimer, K.~Petersen, A.~J. Demers, M.~J. Spreitzer, and
+  C.~H. Hauser.
+\newblock {\em Managing update conflicts in Bayou, a weakly connected
+  replicated storage system}, volume~29.
+\newblock ACM, 1995.
 
 \bibitem{Vaziri:2006:ASC:1111320.1111067}
 M.~Vaziri, F.~Tip, and J.~Dolby.
