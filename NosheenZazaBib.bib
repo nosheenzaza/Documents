@@ -1,7 +1,87 @@
+@inproceedings{cunningham2014resilient,
+  title={Resilient X10: efficient failure-aware programming},
+  author={Cunningham, David and Grove, David and Herta, Benjamin and Iyengar, Arun and Kawachiya, Kiyokuni and Murata, Hiroki and Saraswat, Vijay and Takeuchi, Mikio and Tardieu, Olivier},
+  booktitle={Proceedings of the 19th ACM SIGPLAN symposium on Principles and practice of parallel programming},
+  pages={67--80},
+  year={2014},
+  organization={ACM}
+}
+
+ @incollection{shapiro2011conflict,
+   title={Conflict-free replicated data types},
+   author={Shapiro, Marc and Pregui{\c{c}}a, Nuno and Baquero, Carlos and Zawirski, Marek},
+   booktitle={Stabilization, Safety, and Security of Distributed Systems},
+   pages={386--400},
+   year={2011},
+   publisher={Springer}
+ }
+ 
+ @inproceedings{Kermarrec:2001:IAR:383962.384020,
+  author = {Kermarrec, Anne-Marie and Rowstron, Antony and Shapiro, Marc and Druschel, Peter},
+  title = {The {I}ce{C}ube Approach to the Reconciliation of Divergent Replicas},
+  booktitle = {Proceedings of the Twentieth Annual ACM Symposium on Principles of Distributed Computing},
+  series = {PODC '01},
+  year = {2001},
+  isbn = {1-58113-383-9},
+  location = {Newport, Rhode Island, USA},
+  pages = {210--218},
+  numpages = {9},
+  url = {http://doi.acm.org/10.1145/383962.384020},
+  doi = {10.1145/383962.384020},
+  acmid = {384020},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+ } 
+ 
+ 
+ @article{Garcia-Molina:1987:SAG:38714.38742,
+  author = {Garcia-Molina, Hector and Salem, Kenneth},
+  title = {Sagas},
+  journal = {SIGMOD Rec.},
+  issue_date = {Dec. 1987},
+  volume = {16},
+  number = {3},
+  month = dec,
+  year = {1987},
+  issn = {0163-5808},
+  pages = {249--259},
+  numpages = {11},
+  url = {http://doi.acm.org/10.1145/38714.38742},
+  doi = {10.1145/38714.38742},
+  acmid = {38742},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+ }
+ 
+ @online{rust,
+    author = {Mozilla},
+    title = {The {R}ust Programming language Homepage},
+    howpublished = {\url{http://www.rust-lang.org/}},
+  }
+
+
+
+@article{clausen1999branch,
+  title={Branch and bound algorithms-principles and examples},
+  author={Clausen, Jens},
+  journal={Department of Computer Science, University of Copenhagen},
+  pages={1--30},
+  year={1999}
+}
+
+@inproceedings{mcsherry2005uniform,
+  title={A uniform approach to accelerated {P}age{R}ank computation},
+  author={McSherry, Frank},
+  booktitle={Proceedings of the 14th international conference on World Wide Web},
+  pages={575--582},
+  year={2005},
+  organization={ACM}
+}
+
 @inproceedings{Lucassen:1988:PES:73560.73564,
  author = {Lucassen, J. M. and Gifford, D. K.},
  title = {Polymorphic Effect Systems},
- booktitle = {Proceedings of the 15th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+ booktitle = {Proceedings of the 15th ACM SIGPLAN-SIGACT {S}ymposium on {P}rinciples of {P}rogramming {L}anguages},
  series = {POPL '88},
  year = {1988},
  isbn = {0-89791-252-7},
@@ -18,7 +98,7 @@
 @inproceedings{gifford1979weighted,
   title={Weighted voting for replicated data},
   author={Gifford, David K},
-  booktitle={Proceedings of the seventh ACM symposium on Operating systems principles},
+  booktitle={Proceedings of the seventh ACM Symposium on Operating Systems Principles},
   pages={150--162},
   year={1979},
   organization={ACM}
@@ -33,14 +113,22 @@
   organization={IEEE}
 }
 
-@book{terry1995managing,
-  title={Managing update conflicts in Bayou, a weakly connected replicated storage system},
-  author={Terry, Douglas B and Theimer, Marvin M and Petersen, Karin and Demers, Alan J and Spreitzer, Mike J and Hauser, Carl H},
-  volume={29},
-  number={5},
-  year={1995},
-  publisher={ACM}
-}
+@inproceedings{Terry:1995:MUC:224056.224070,
+ author = {Terry, D. B. and Theimer, M. M. and Petersen, Karin and Demers, A. J. and Spreitzer, M. J. and Hauser, C. H.},
+ title = {Managing Update Conflicts in Bayou, a Weakly Connected Replicated Storage System},
+ booktitle = {Proceedings of the Fifteenth ACM Symposium on Operating Systems Principles},
+ series = {SOSP '95},
+ year = {1995},
+ isbn = {0-89791-715-4},
+ location = {Copper Mountain, Colorado, USA},
+ pages = {172--182},
+ numpages = {11},
+ url = {http://doi.acm.org/10.1145/224056.224070},
+ doi = {10.1145/224056.224070},
+ acmid = {224070},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
 
 @inproceedings{raynal1995causal,
   title={From causal consistency to sequential consistency in shared memory systems},
@@ -52,9 +140,9 @@
 }
 
  @online{concurrentskiplistmap,
-    author = {Doug Lea},
-    title = {Source for java.util.concurrent.ConcurrentSkipListMap},
-    howpublished = {\url{http://fuseyism.com/classpath/doc/java/util/concurrent/ConcurrentSkipListMap-source.html}},
+    author = {Oracle}, 
+    title = {java.util.concurrent.{C}oncurrent{S}kip{L}ist{M}ap},
+    howpublished = {\url{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentSkipListMap.html}},
   }
 
 
@@ -96,7 +184,7 @@
 }
 
 @incollection{wrigstad2009loci,
-  title={Loci: Simple thread-locality for Java},
+  title={Loci: Simple thread-locality for {J}ava},
   author={Wrigstad, Tobias and Pizlo, Filip and Meawad, Fadi and Zhao, Lei and Vitek, Jan},
   booktitle={ECOOP 2009--Object-Oriented Programming},
   pages={445--469},
@@ -111,7 +199,7 @@
 }
 
 @inproceedings{alvaro2011consistency,
-  title={Consistency Analysis in Bloom: a CALM and Collected Approach.},
+  title={Consistency Analysis in {B}loom: a CALM and Collected Approach.},
   author={Alvaro, Peter and Conway, Neil and Hellerstein, Joe and Marczak, William R},
   booktitle={CIDR},
   pages={249--260},
@@ -162,21 +250,12 @@
 }
 
 @incollection{bernstein2009sql,
-  title={SQL Isolation Levels},
+  title={{SQL} Isolation Levels},
   author={Bernstein, Philip A},
   booktitle={Encyclopedia of Database Systems},
   pages={2761--2762},
   year={2009},
   publisher={Springer}
-}
-
-@inproceedings{liu2008coqa,
-  title={Coqa: Concurrent objects with quantized atomicity},
-  author={Liu, Yu David and Lu, Xiaoqi and Smith, Scott F},
-  booktitle={Compiler Construction},
-  pages={260--275},
-  year={2008},
-  organization={Springer}
 }
 
  @inproceedings{imam2012integrating,
@@ -199,13 +278,13 @@
 
 
 @techreport{odersky2004overview,
-  title={An overview of the Scala programming language},
+  title={An overview of the {S}cala programming language},
   author={Odersky, Martin and Altherr, Philippe and Cremet, Vincent and Emir, Burak and Maneth, Sebastian and Micheloud, St{\'e}phane and Mihaylov, Nikolay and Schinz, Michel and Stenman, Erik and Zenger, Matthias},
   year={2004}
 }
 
 @article{armstrong1993concurrent,
-  title={Concurrent programming in ERLANG},
+  title={Concurrent programming in {E}rlang},
   author={Armstrong, Joe and Virding, Robert and Wikstr{\"o}m, Claes and Williams, Mike},
   year={1993},
   publisher={Citeseer}
@@ -230,7 +309,7 @@
 }
 
  @online{x10spec,
-    author = {Vijay Saraswat et al.
+    author = {{V}ijay {S}araswat et al.
 },
     title = {X10 Language Specification},
     howpublished = {\url{http://x10.sourceforge.net/documentation/languagespec/x10-latest.pdf}},
@@ -242,7 +321,7 @@
 @article{charles2005x10,
   title={X10: an object-oriented approach to non-uniform cluster computing},
   author={Charles, Philippe and Grothoff, Christian and Saraswat, Vijay and Donawa, Christopher and Kielstra, Allan and Ebcioglu, Kemal and Von Praun, Christoph and Sarkar, Vivek},
-  journal={Acm Sigplan Notices},
+  journal={ACM SIGPLAN Notices},
   volume={40},
   number={10},
   pages={519--538},
@@ -251,9 +330,9 @@
 }
 
 @article{rentsch1982object,
-  title={Object oriented programming},
+  title={Object-oriented programming},
   author={Rentsch, Tim},
-  journal={ACM Sigplan Notices},
+  journal={ACM SIGPLAN Notices},
   volume={17},
   number={9},
   pages={51--57},
@@ -289,7 +368,7 @@
 %%%%%%%%%%%%%%%   Java   %%%%%%%%%%%%%%%
 @online{javamemorymodel,
    author = {Oracle},
-   title = {Threads and Locks},
+   title = {Java Language Specification, Chapter 17},
    howpublished = {\url{http://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.4
  }},
    year = {2014}
@@ -309,8 +388,8 @@
 
 @inproceedings{Chong:2008:RAW:1353522.1353528,
  author = {Chong, Nathan and Ishtiaq, Samin},
- title = {Reasoning About the ARM Weakly Consistent Memory Model},
- booktitle = {Proceedings of the 2008 ACM SIGPLAN Workshop on Memory Systems Performance and Correctness: Held in Conjunction with the Thirteenth International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS '08)},
+ title = {Reasoning About the {ARM} Weakly Consistent Memory Model},
+ booktitle = {Proceedings of the 2008 ACM SIGPLAN Workshop on Memory Systems Performance and Correctness},
  series = {MSPC '08},
  year = {2008},
  isbn = {978-1-60558-049-4},
@@ -329,7 +408,7 @@
 @article{adve1996shared,
   title={Shared memory consistency models: A tutorial},
   author={Adve, Sarita V and Gharachorloo, Kourosh},
-  journal={computer},
+  journal={IEEE Computer},
   volume={29},
   number={12},
   pages={66--76},
@@ -556,7 +635,7 @@
 }
 
 @inproceedings{hastorun2007dynamo,
-  title={Dynamo: Amazon’s highly available key-value store},
+  title={Dynamo: Amazon's highly available key-value store},
   author={Hastorun, Deniz and Jampani, Madan and Kakulapati, Gunavardhan and Pilchin, Alex and Sivasubramanian, Swaminathan and Vosshall, Peter and Vogels, Werner},
   booktitle={In Proc. SOSP},
   year={2007},
@@ -588,7 +667,7 @@
 
 @online{cassandraebay,
   author = {Feng Qu and Anurag Jambhekar},
-  title = {Cassandra at eBay Scale},
+  title = {Cassandra at e{B}ay Scale},
   howpublished = {\url{http://www.slideshare.net/planetcassandra/5-feng-qu}},
   year = {2013}
 }

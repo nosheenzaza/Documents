@@ -1,0 +1,21 @@
+%! TEX root = main.tex
+
+
+\begin{abstract}
+Consistency level of data can be an important parameter in distributed systems,
+which impacts performance and availability of a distributed service. However,
+current development frameworks and synchronization protocols make it difficult
+and unintuitive to set this parameter for an entire system or a portion of it.
+One extreme is to use strict serializability, which is the most intuitive but
+the most costly. Another extreme resorting to eventual consistency, which
+provides very weak consistency guarantees and is harder to reason about.
+Furthermore, No system we know of specifies semantics for the interaction
+between systems that have differing consistency policies. In this paper, we
+present data-centric consistency policies, An improvement upon cloud types
+programming language, that enables expressing and enforcing consistency policies
+on a high level. We describe the runtime system in terms of the commit protocol,
+and show how this system can be expressive, provide more understandable
+programs, and allow the commit protocol to exploit apriori available consistency
+information to perform various optimizations.
+\end{abstract}
+

@@ -3,7 +3,7 @@
 \bibitem{adve1996shared}
 S.~V. Adve and K.~Gharachorloo.
 \newblock Shared memory consistency models: A tutorial.
-\newblock {\em computer}, 29(12):66--76, 1996.
+\newblock {\em IEEE Computer}, 29(12):66--76, 1996.
 
 \bibitem{agha1985actors}
 G.~A. Agha.
@@ -12,12 +12,12 @@ G.~A. Agha.
 
 \bibitem{alvaro2011consistency}
 P.~Alvaro, N.~Conway, J.~Hellerstein, and W.~R. Marczak.
-\newblock Consistency analysis in bloom: a calm and collected approach.
+\newblock Consistency analysis in {B}loom: a calm and collected approach.
 \newblock In {\em CIDR}, pages 249--260. Citeseer, 2011.
 
 \bibitem{armstrong1993concurrent}
 J.~Armstrong, R.~Virding, C.~Wikstr{\"o}m, and M.~Williams.
-\newblock Concurrent programming in erlang.
+\newblock Concurrent programming in {E}rlang.
 \newblock 1993.
 
 \bibitem{artho2003high}
@@ -28,7 +28,7 @@ C.~Artho, K.~Havelund, and A.~Biere.
 
 \bibitem{bernstein2009sql}
 P.~A. Bernstein.
-\newblock Sql isolation levels.
+\newblock {SQL} isolation levels.
 \newblock In {\em Encyclopedia of Database Systems}, pages 2761--2762.
   Springer, 2009.
 
@@ -47,15 +47,13 @@ J.~Boner.
 P.~Charles, C.~Grothoff, V.~Saraswat, C.~Donawa, A.~Kielstra, K.~Ebcioglu,
   C.~Von~Praun, and V.~Sarkar.
 \newblock X10: an object-oriented approach to non-uniform cluster computing.
-\newblock {\em Acm Sigplan Notices}, 40(10):519--538, 2005.
+\newblock {\em ACM SIGPLAN Notices}, 40(10):519--538, 2005.
 
 \bibitem{Chong:2008:RAW:1353522.1353528}
 N.~Chong and S.~Ishtiaq.
-\newblock Reasoning about the arm weakly consistent memory model.
+\newblock Reasoning about the {ARM} weakly consistent memory model.
 \newblock In {\em Proceedings of the 2008 ACM SIGPLAN Workshop on Memory
-  Systems Performance and Correctness: Held in Conjunction with the Thirteenth
-  International Conference on Architectural Support for Programming Languages
-  and Operating Systems (ASPLOS '08)}, MSPC '08, pages 16--19, New York, NY,
+  Systems Performance and Correctness}, MSPC '08, pages 16--19, New York, NY,
   USA, 2008. ACM.
 
 \bibitem{clarke2008minimal}
@@ -63,29 +61,40 @@ D.~Clarke, T.~Wrigstad, J.~{\"O}stlund, and E.~B. Johnsen.
 \newblock {\em Minimal ownership for active objects}.
 \newblock Springer, 2008.
 
+\bibitem{clausen1999branch}
+J.~Clausen.
+\newblock Branch and bound algorithms-principles and examples.
+\newblock {\em Department of Computer Science, University of Copenhagen}, pages
+  1--30, 1999.
+
+\bibitem{cunningham2014resilient}
+D.~Cunningham, D.~Grove, B.~Herta, A.~Iyengar, K.~Kawachiya, H.~Murata,
+  V.~Saraswat, M.~Takeuchi, and O.~Tardieu.
+\newblock Resilient x10: efficient failure-aware programming.
+\newblock In {\em Proceedings of the 19th ACM SIGPLAN symposium on Principles
+  and practice of parallel programming}, pages 67--80. ACM, 2014.
+
 \bibitem{dolby2012data}
 J.~Dolby, C.~Hammer, D.~Marino, F.~Tip, M.~Vaziri, and J.~Vitek.
 \newblock A data-centric approach to synchronization.
 \newblock {\em ACM Transactions on Programming Languages and Systems (TOPLAS)},
   34(1):4, 2012.
 
-\bibitem{x10spec}
-V.~S. et~al.
-\newblock X10 language specification.
-\newblock
-  \url{http://x10.sourceforge.net/documentation/languagespec/x10-latest.pdf},
-  2014.
-
 \bibitem{flanagan2003type}
 C.~Flanagan and S.~Qadeer.
 \newblock A type and effect system for atomicity.
 \newblock In {\em ACM SIGPLAN Notices}, volume~38, pages 338--349. ACM, 2003.
 
+\bibitem{Garcia-Molina:1987:SAG:38714.38742}
+H.~Garcia-Molina and K.~Salem.
+\newblock Sagas.
+\newblock {\em SIGMOD Rec.}, 16(3):249--259, Dec. 1987.
+
 \bibitem{gifford1979weighted}
 D.~K. Gifford.
 \newblock Weighted voting for replicated data.
-\newblock In {\em Proceedings of the seventh ACM symposium on Operating systems
-  principles}, pages 150--162. ACM, 1979.
+\newblock In {\em Proceedings of the seventh ACM Symposium on Operating Systems
+  Principles}, pages 150--162. ACM, 1979.
 
 \bibitem{haller2010capabilities}
 P.~Haller and M.~Odersky.
@@ -101,7 +110,7 @@ P.~Haller, A.~Prokopec, H.~Miller, V.~Klang, R.~Kuhn, and V.~Jovanovic.
 \bibitem{hastorun2007dynamo}
 D.~Hastorun, M.~Jampani, G.~Kakulapati, A.~Pilchin, S.~Sivasubramanian,
   P.~Vosshall, and W.~Vogels.
-\newblock Dynamo: Amazon’s highly available key-value store.
+\newblock Dynamo: Amazon's highly available key-value store.
 \newblock In {\em In Proc. SOSP}. Citeseer, 2007.
 
 \bibitem{herlihy2008transactional}
@@ -122,6 +131,13 @@ S.~M. Imam and V.~Sarkar.
 \newblock Integrating task parallelism with actors.
 \newblock In {\em ACM SIGPLAN Notices}, volume~47, pages 753--772. ACM, 2012.
 
+\bibitem{Kermarrec:2001:IAR:383962.384020}
+A.-M. Kermarrec, A.~Rowstron, M.~Shapiro, and P.~Druschel.
+\newblock The {I}ce{C}ube approach to the reconciliation of divergent replicas.
+\newblock In {\em Proceedings of the Twentieth Annual ACM Symposium on
+  Principles of Distributed Computing}, PODC '01, pages 210--218, New York, NY,
+  USA, 2001. ACM.
+
 \bibitem{lakshman2010cassandra}
 A.~Lakshman and P.~Malik.
 \newblock Cassandra: a decentralized structured storage system.
@@ -133,29 +149,29 @@ L.~Lamport.
   multiprocess programs.
 \newblock {\em Computers, IEEE Transactions on}, 100(9):690--691, 1979.
 
-\bibitem{concurrentskiplistmap}
-D.~Lea.
-\newblock Source for java.util.concurrent.concurrentskiplistmap.
-\newblock
-  \url{http://fuseyism.com/classpath/doc/java/util/concurrent/ConcurrentSkipListMap-source.html}.
-
-\bibitem{liu2008coqa}
-Y.~D. Liu, X.~Lu, and S.~F. Smith.
-\newblock Coqa: Concurrent objects with quantized atomicity.
-\newblock In {\em Compiler Construction}, pages 260--275. Springer, 2008.
-
 \bibitem{Lucassen:1988:PES:73560.73564}
 J.~M. Lucassen and D.~K. Gifford.
 \newblock Polymorphic effect systems.
-\newblock In {\em Proceedings of the 15th ACM SIGPLAN-SIGACT Symposium on
-  Principles of Programming Languages}, POPL '88, pages 47--57, New York, NY,
-  USA, 1988. ACM.
+\newblock In {\em Proceedings of the 15th ACM SIGPLAN-SIGACT {S}ymposium on
+  {P}rinciples of {P}rogramming {L}anguages}, POPL '88, pages 47--57, New York,
+  NY, USA, 1988. ACM.
 
 \bibitem{marino2009generic}
 D.~Marino and T.~Millstein.
 \newblock A generic type-and-effect system.
 \newblock In {\em Proceedings of the 4th international workshop on Types in
   language design and implementation}, pages 39--50. ACM, 2009.
+
+\bibitem{mcsherry2005uniform}
+F.~McSherry.
+\newblock A uniform approach to accelerated {P}age{R}ank computation.
+\newblock In {\em Proceedings of the 14th international conference on World
+  Wide Web}, pages 575--582. ACM, 2005.
+
+\bibitem{rust}
+Mozilla.
+\newblock The {R}ust programming language homepage.
+\newblock \url{http://www.rust-lang.org/}.
 
 \bibitem{muller1999universes}
 P.~M{\"u}ller and A.~Poetzsch-Heffter.
@@ -171,19 +187,25 @@ MySQL.
 \bibitem{odersky2004overview}
 M.~Odersky, P.~Altherr, V.~Cremet, B.~Emir, S.~Maneth, S.~Micheloud,
   N.~Mihaylov, M.~Schinz, E.~Stenman, and M.~Zenger.
-\newblock An overview of the scala programming language.
+\newblock An overview of the {S}cala programming language.
 \newblock Technical report, 2004.
+
+\bibitem{concurrentskiplistmap}
+Oracle.
+\newblock java.util.concurrent.{C}oncurrent{S}kip{L}ist{M}ap.
+\newblock
+  \url{http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentSkipListMap.html}.
 
 \bibitem{javamemorymodel}
 Oracle.
-\newblock Threads and locks.
+\newblock Java language specification, chapter 17.
 \newblock
   \url{http://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.4 },
   2014.
 
 \bibitem{cassandraebay}
 F.~Qu and A.~Jambhekar.
-\newblock Cassandra at ebay scale.
+\newblock Cassandra at e{B}ay scale.
 \newblock \url{http://www.slideshare.net/planetcassandra/5-feng-qu}, 2013.
 
 \bibitem{raynal1995causal}
@@ -201,8 +223,14 @@ E.~Redmond and J.~R. Wilson.
 
 \bibitem{rentsch1982object}
 T.~Rentsch.
-\newblock Object oriented programming.
-\newblock {\em ACM Sigplan Notices}, 17(9):51--57, 1982.
+\newblock Object-oriented programming.
+\newblock {\em ACM SIGPLAN Notices}, 17(9):51--57, 1982.
+
+\bibitem{shapiro2011conflict}
+M.~Shapiro, N.~Pregui{\c{c}}a, C.~Baquero, and M.~Zawirski.
+\newblock Conflict-free replicated data types.
+\newblock In {\em Stabilization, Safety, and Security of Distributed Systems},
+  pages 386--400. Springer, 2011.
 
 \bibitem{shavit1997software}
 N.~Shavit and D.~Touitou.
@@ -217,18 +245,26 @@ D.~B. Terry, A.~J. Demers, K.~Petersen, M.~J. Spreitzer, M.~M. Theimer, and
   Proceedings of the Third International Conference on}, pages 140--149. IEEE,
   1994.
 
-\bibitem{terry1995managing}
+\bibitem{Terry:1995:MUC:224056.224070}
 D.~B. Terry, M.~M. Theimer, K.~Petersen, A.~J. Demers, M.~J. Spreitzer, and
   C.~H. Hauser.
-\newblock {\em Managing update conflicts in Bayou, a weakly connected
-  replicated storage system}, volume~29.
-\newblock ACM, 1995.
+\newblock Managing update conflicts in bayou, a weakly connected replicated
+  storage system.
+\newblock In {\em Proceedings of the Fifteenth ACM Symposium on Operating
+  Systems Principles}, SOSP '95, pages 172--182, New York, NY, USA, 1995. ACM.
 
 \bibitem{Vaziri:2006:ASC:1111320.1111067}
 M.~Vaziri, F.~Tip, and J.~Dolby.
 \newblock Associating synchronization constraints with data in an
   object-oriented language.
 \newblock {\em SIGPLAN Not.}, 41(1):334--345, Jan. 2006.
+
+\bibitem{x10spec}
+{V}ijay {S}araswat~et al.
+\newblock X10 language specification.
+\newblock
+  \url{http://x10.sourceforge.net/documentation/languagespec/x10-latest.pdf},
+  2014.
 
 \bibitem{vogels2009eventually}
 W.~Vogels.
@@ -237,7 +273,7 @@ W.~Vogels.
 
 \bibitem{wrigstad2009loci}
 T.~Wrigstad, F.~Pizlo, F.~Meawad, L.~Zhao, and J.~Vitek.
-\newblock Loci: Simple thread-locality for java.
+\newblock Loci: Simple thread-locality for {J}ava.
 \newblock In {\em ECOOP 2009--Object-Oriented Programming}, pages 445--469.
   Springer, 2009.
 

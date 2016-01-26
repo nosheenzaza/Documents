@@ -1,0 +1,109 @@
+\documentclass{llncs}
+
+\usepackage{cite}
+\usepackage{etex}
+\usepackage[T1]{fontenc}
+\usepackage{cite}
+\usepackage{xspace}
+\usepackage[all]{xy}
+\usepackage{listings}
+% \usepackage{multocl}
+\usepackage{amstext}
+\usepackage{stmaryrd}
+\usepackage{times}
+\usepackage{txtt}
+\usepackage{url}
+\usepackage{pgfplots}
+\usepackage{epstopdf}
+\usepackage{textcomp}
+
+% \newif\ifcamera
+% \cameratrue
+
+
+% \renewcommand\texttt[1]{\texttt{\frenchspacing#1}}
+% \usepackage{lmodern}% http://ctan.org/pkg/lm
+% \renewcommand{\ttdefault}{pcr}
+\renewcommand\c[1]{\texttt{#1}}
+% \renewcommand\c[1]{\lstinline{{#1}}}
+\newcommand\SB[1]{\llbracket#1\rrbracket}
+\newcommand\trans{&\hookrightarrow}
+\newcommand\stepsone{\longrightarrow}
+\newcommand\bnf{\,\,|\,\,}
+
+\DeclareGraphicsExtensions{.eps}
+\pgfplotsset{compat=1.5}
+
+
+\lstdefinelanguage{scala}{
+  morekeywords={%
+          incremental,then, abstract,case,catch,class,def,do,else,extends,%
+          false,final,finally,for,forSome,if,implicit,import,lazy,%
+          match,new,null,object,override,package,private,protected,%
+          return,macro,sealed,super,this,throw,trait,true,try,type,%
+          val,var,while,with,yield},
+  otherkeywords={=>,<-,<\%,<:,>:,\#,@},%
+  sensitive=true,%
+  morecomment=[l]{//},%
+  morecomment=[n]{/*}{*/},%
+  morestring=[b]",%
+  morestring=[b]',%
+  morestring=[b]""",%
+  % numbers=left%
+ }[keywords,comments,strings]
+
+\lstset{
+  %frame=single,
+  language=scala,%
+  tabsize=2,%
+  basicstyle=\small\ttfamily, 
+  commentstyle=\itshape,%
+  keywordstyle=\bfseries,%
+  captionpos=b
+}
+
+
+% \ifcamera
+% %\pagestyle{empty}
+% \else
+% \pagestyle{plain}
+% \fi
+%
+
+\begin{document}
+
+\title{
+  Data Centric Consistency Policies for Managing Distributed Data Consistency
+}
+
+\author{Nosheen Zaza  \and Nathaniel Nystrom}
+\institute{Universit\`a della Svizzera italiana (USI), Faculty of
+  Informatics, Lugano, Switzerland \\
+\email{\{ nosheen.zaza, nate.nystrom\}@usi.ch}}
+
+\maketitle
+
+\input{abstract}
+
+\keywords{Distributed Systems, Commit Protocols, Programming Languages}
+
+% Input sections
+\input{introduction}
+\input{relatedwork}
+\input{language}
+% \input{implementation}
+\input{runtime}
+\input{evaluation}
+\input{conclusion}
+
+\section*{Acknowledgments}
+
+This work was supported by the Swiss National Science Foundation (project
+200021-138091). 
+
+%%%%%%%
+\bibliography{myBibliographyDB}
+\bibliographystyle{splncs_srt}
+
+
+\end{document}

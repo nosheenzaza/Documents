@@ -1,0 +1,167 @@
+%! TEX root = main.tex
+
+
+\section{Introduction}
+
+% Why replicate?
+In modern distributed systems, data is often replicated, either partially or totally 
+across several nodes. Replication primarily contributes to making distributed 
+applications more resilient to failure, and allowing the placement of data closer to clients, 
+thus reducing communication delays especially for geo-distributed applications. 
+% Problems that need to be solved when replicating
+When implemented correctly, replication can greatly improve availability and performance.
+However, managing the consistency of replicated data is a well-known, nontrivial
+problem. Ideally, all clients must observe the most recent, correct (according to
+application specification) data at all times. This ideal consistency model is what
+strict serializability transaction isolation level (ref) provides. However, it
+is typically costly to provide this level of consistency.  Strict
+serializability is commonly implemented using two-phase commit(ref), which does not
+tolerate node failure and required a leader, which introduces a single point of
+failure. Current advanced
+approaches, such as paxos-based commit protocols(refs) or three-phase commit(ref),
+require a quorum of replicas to be up, a large number of messages or very
+specific domain knowledge. \\  %elaborate later on, good discussion in MDCC paper.
+
+% Do we always need strong consistency?
+For many systems, achieving this strong consistency level is unrealistic given
+the implied costs. Furthermore, it is possible to enforce many useful and common
+application correctness criteria without needing strict serializability. 
+
+% We can use eventual consistency for the following with the following benefits
+For instance, we can rely solely on eventual consistency, while still providing
+reasonable application behavior for many use-cases, such as:
+
+\begin{enumerate}
+\item Creating twitter-like news feeds. There is no need to query all nodes for
+the most recent versions data in order to display a satisfactory news feed.
+
+\item Creating lists of recommended products based on a user's browse history.
+Such lists need not be made immediately available on all nodes, as we can
+continue to use slightly out of data lists and view them on rendered pages.
+
+\item Counting views on an article, video, photo...etc: It does not matter if
+different clients see different values for such counters, as long as these
+views eventually converge to the same value.
+\end{enumerate}
+
+We can observe from the previous list, that due to the probabilistic nature and 
+inherent non-determinism of many Internet applications, it is possible to exploit 
+eventual consistency, and provide correct (albeit relaxed) application behavior, 
+very likely at a cost that is orders of magnitude cheaper than strict serializability 
+or other stronger consistency levels. 
+
+% How common is eventual consistency? What is the possible cost?
+For many commercial distributed storage
+systems, such as Cassandra(ref) or MongoDB (ref), eventual consistency is the default
+level, and the default configuration requires contacting only a single node in
+order to acknowledge the success of a read or write. (write also cost in terms
+of message rounds).
+
+% However, we cannot enforce all invariants with only eventual consistency
+Of course, there are use cases where nothing other than strong consistency can
+satisfy the correctness invariant. Such as:
+
+\begin{enumerate}
+
+\item Assigning non abritrary, unique identifuers, such as unique user names or
+ascending serial numbers. (ref bailis)
+
+\item Maintaining consistency of counters supporting arbitrary operations, such
+as bank account balance, or stock of an item. 
+
+\item Acquiring a finite resource, such as tickets or airplane seats. 
+
+\item Ensuring that a resouce is used only $n$ times, such as resetting a
+password with a reset token and using it only once. 
+\end{enumerate}
+
+% There are other invariants that require a consistency level in between
+ Between these two extremes, there are many other consistency models. For
+ instance, the Atomic visibility model(ref) can be used for cases that
+ require all parts of a data item to be viewed consistently, but does not require
+ the most recent version of a data item. For the following cases, 
+ atomic visibility can maintain correctness at a cost lower than strict
+ serializability: 
+% TODO I think these examples are very abstract. I better replace them with more
+% tangible ones. 
+\begin{enumerate}
+\item Maintaining materialized views.
+\item Maintaining foreign key constraints.
+\item Maintaining materialized views.
+\end{enumerate}
+
+% The problem is that using all these consistency levels in applications 
+% is not easy to express or reason about. 
+It is not hard to find many distributed applications that include use cases
+requiring more than one of the consistency models we described here, such as social media
+platforms, E-commerce, games...etc. When these applications must service millions of
+clients across the globe correctly, with competitive performance and
+availability, selecting the correct consistency policy becomes crucial.
+Selecting the strongest policy can have drastic effects on availability, while
+resorting to eventual consistency can cause violation of correctness invariants.
+authors of (MDCC) conducted a thorough evaluation comparing .... (finish the
+story later)
+\\
+
+How can programmers specify a consistency policy? For relational databases,
+transaction isolation levels can be used. In Cassandra, a consistency level can
+be specified for all read-write operations. The problem with such approaches, is
+that correctness invariants are usually described in terms of the state of data
+before and after applying an operation(what refs can I list here?) 
+(e.g a transaction or update function) to
+it. However, it is not always clear what constitutes a data unit, or an
+operation unit. One could argue that a transaction serves as an abstraction of
+an operation unit, but then how can we guarantee that all parts of a data unit
+that need to be updated in order to maintain an invariant are actually updated?
+Even worse, when the data is replicated, it could be that updates to different
+parts of a data unit are propagated out of order, or in different orders to
+different replicas. The consistency of a data unit is also the result of complex
+interactions of reads and writes, and depends on the consistency level of both.
+For instance, for data to be consistent in Cassandra, it is not enough to only
+write to a quorum of nodes for all elements of a data item, but all reads of
+that data item must be from a quorum as well. 
+
+% This is unfortunate given the impact consistency level can have on performance
+% and how choosing the wrong level can impact program correctness. I can here
+% show evaluation results from MDCC paper.
+(I want to say here that current tools do not provide suitable abstractions to
+represent multi-component, replicated data items, operations units, how to
+enforce consistency requirements on data. I also need to show somewhere that
+consistency is a property of data.)\\
+
+% We propose a solution, based on observing that invariants on data are not
+% temporal, as shown by Bailis, also shown before in the work on atomic sets.
+In this paper, we present Data Centric Cloud types, an extension to the cloud
+types distributed programming language, that provides high-level abstractions to replicated
+data and data operations, and enables expressing consistency requirements on
+data items declaratively. We also present the commit protocol that exploits
+consistency information to allow more concurrent operations. The rest of this paper
+is organized as follows: In Section 2 we overview related problems and work,
+that inspired the design of the language and commit protocol or were
+incorporated into them. Section 3 formally describes our languages syntax and
+semantics. In Section 4, we describe how the runtime of the language orders
+read/write operations through the commit protocol. Section 5 describes the
+prototypes implementation of the language and shows preliminary evaluation
+results. Finally, Section 6 outlines future work and concludes. 
+
+% The idea is to attach consistency policies to data. In the work of atomic
+% sets, it is not clear how transactions working on different sets interact and
+% how they should be ordered. We contribute by showing how to order them in a
+% way that preseves correctness, depending on work by Adya.
+
+% We outline the language specification that contains sets with policies, which
+% is built on top of Cloud types language.
+
+% We show examples of common use cases, consistency policies attached and so on.
+
+% Then we go further and show the commit protocol, which orders transactions and
+% specifies the number of replicas to be contacted, what is really useful here
+% is that the cost model becomes clearer (really?) 
+
+% Finally we discuss future extensions and possible integration with current
+% storage systems or languages. 
+Replication requires every write issued by system clients to be
+propagated across all replicas. Furthermore, concurrent, or out-of-order writes
+must be ordered in a way that does not violate application correctness criteria.  
+
+
