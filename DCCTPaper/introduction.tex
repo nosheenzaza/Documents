@@ -71,7 +71,7 @@ as bank account balance, or stock of an item.
 
 \item Acquiring a finite resource, such as tickets or airplane seats. 
 
-\item Ensuring that a resouce is used only $n$ times, such as resetting a
+\item Ensuring that a resource is used only $n$ times, such as resetting a
 password with a reset token and using it only once. 
 \end{enumerate}
 
@@ -97,13 +97,47 @@ requiring more than one of the consistency models we described here, such as soc
 platforms, E-commerce, games...etc. When these applications must service millions of
 clients across the globe correctly, with competitive performance and
 availability, selecting the correct consistency policy becomes crucial.
-Selecting the strongest policy can have drastic effects on availability, while
+Selecting the strongest policy can have drastic negative effects on availability, while
 resorting to eventual consistency can cause violation of correctness invariants.
-authors of (MDCC) conducted a thorough evaluation comparing .... (finish the
-story later)
-\\
+For instance, authors of (MDCC) conducted part of evaluation to their Paxos-based commit
+protocol by comparing the performance of TPC-C transactions when executed under eventual consistency  
+, two-phase commit  and their protocol itself. It is not surprising that in all cases, the eventually
+consistent protocol was by far the most
+performant. However, using only this consistency level cannot guarantee that
+some transactions, such as the product buy request will behave correctly, as
+this would require strong consistency to maintain the invariant that stock must
+remain positive (assuming this is an application requirement!) \\
 
-How can programmers specify a consistency policy? For relational databases,
+% How are consistency policies defined? In terms of what?
+% I think i will move this def upwards when I start talking about strict
+% serializability. Not sure though if I need to define how a consistency policy
+% is defined. 
+How can programmers specify a consistency policy? 
+A consistency policy generally limits possible orderings and concurrency among
+operations executed in parallel over data. The nature of data and operations
+greatly influences the complexity of the consistency policy definition and
+complexity. For instance, linearizability(ref) is concerned with ordering single
+operations over a single data item. While a useful, comprehensible theoretical
+definition, it applies only to a very narrow subset of real-world operation
+abstractions and data representation. It could, for instance be used to model adding
+two numbers that occupy only a single memory location (assuming accesses to
+memory locations are atomic). But it would fail to represent using the ++
+operator in Java over longs (which occupy two memory locations), not to mention
+modelling transactions touching many data items, possibly partitioned over many
+machines and/or replicated. Strict seriailzability could be thought of as
+linearizability that covers grouped operations (transactions) and groups of
+items. However, it does not cover the semantics of replicated data items.
+Definitions for state machine replication(ref), (need other stuff here), define
+how operations on replicated data must execute, but not for collections of items
+spread over that are replicated, but different parts of the replica are not on
+the same machine. (need to verify that, or if there are others defs covering that)
+
+From the above discussion, we can see how important it is to precisely define
+replication and placement strategies, units of data and operations in order to
+be able to correctly argue about consistency properties of an application. Yet,
+current frameworks are either concerned with strong,
+or very weak consistency models, no concrete definitions of data units or
+abstractions of replications. For relational databases,
 transaction isolation levels can be used. In Cassandra, a consistency level can
 be specified for all read-write operations. The problem with such approaches, is
 that correctness invariants are usually described in terms of the state of data
