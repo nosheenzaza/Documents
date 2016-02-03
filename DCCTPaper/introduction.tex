@@ -117,43 +117,41 @@ A consistency policy generally limits possible orderings and concurrency among
 operations executed in parallel over data. The nature of data and operations
 greatly influences the complexity of the consistency policy definition and
 complexity. For instance, linearizability(ref) is concerned with ordering single
-operations over a single data item. While a useful, comprehensible theoretical
+operations over a single data item. While a useful and comprehensible theoretical
 definition, it applies only to a very narrow subset of real-world operation
-abstractions and data representation. It could, for instance be used to model adding
+abstractions and data representations. It could, for instance be used to model adding
 two numbers that occupy only a single memory location (assuming accesses to
-memory locations are atomic). But it would fail to represent using the ++
-operator in Java over longs (which occupy two memory locations), not to mention
-modelling transactions touching many data items, possibly partitioned over many
+memory locations are atomic). But it would fail to represent applying the ++
+operator in Java to longs (which occupy two memory locations), not to mention
+modeling transactions touching multiple data items, possibly partitioned over many
 machines and/or replicated. Strict seriailzability could be thought of as
 linearizability that covers grouped operations (transactions) and groups of
-items. However, it does not cover the semantics of replicated data items.
-Definitions for state machine replication(ref), (need other stuff here), define
-how operations on replicated data must execute, but not for collections of items
-spread over that are replicated, but different parts of the replica are not on
-the same machine. (need to verify that, or if there are others defs covering that)
+items. However, it does not cover the semantics of replicated data items.\\
 
 From the above discussion, we can see how important it is to precisely define
 replication and placement strategies, units of data and operations in order to
 be able to correctly argue about consistency properties of an application. Yet,
 current frameworks are either concerned with strong,
 or very weak consistency models, no concrete definitions of data units or
-abstractions of replications. For relational databases,
-transaction isolation levels can be used. In Cassandra, a consistency level can
-be specified for all read-write operations. The problem with such approaches, is
-that correctness invariants are usually described in terms of the state of data
-before and after applying an operation(what refs can I list here?) 
-(e.g a transaction or update function) to
-it. However, it is not always clear what constitutes a data unit, or an
-operation unit. One could argue that a transaction serves as an abstraction of
-an operation unit, but then how can we guarantee that all parts of a data unit
-that need to be updated in order to maintain an invariant are actually updated?
-Even worse, when the data is replicated, it could be that updates to different
-parts of a data unit are propagated out of order, or in different orders to
-different replicas. The consistency of a data unit is also the result of complex
-interactions of reads and writes, and depends on the consistency level of both.
-For instance, for data to be consistent in Cassandra, it is not enough to only
-write to a quorum of nodes for all elements of a data item, but all reads of
-that data item must be from a quorum as well. 
+abstractions of replications. 
+
+%For relational databases,
+%transaction isolation levels can be used. In Cassandra, a consistency level can
+%be specified for all read-write operations. The problem with such approaches, is
+%that correctness invariants are usually described in terms of the state of data
+%before and after applying an operation(what refs can I list here?) 
+%(e.g a transaction or update function) to
+%it. However, it is not always clear what constitutes a data unit, or an
+%operation unit. One could argue that a transaction serves as an abstraction of
+%an operation unit, but then how can we guarantee that all parts of a data unit
+%that need to be updated in order to maintain an invariant are actually updated?
+%Even worse, when the data is replicated, it could be that updates to different
+%parts of a data unit are propagated out of order, or in different orders to
+%different replicas. The consistency of a data unit is also the result of complex
+%interactions of reads and writes, and depends on the consistency level of both.
+%For instance, for data to be consistent in Cassandra, it is not enough to only
+%write to a quorum of nodes for all elements of a data item, but all reads of
+%that data item must be from a quorum as well. 
 
 % This is unfortunate given the impact consistency level can have on performance
 % and how choosing the wrong level can impact program correctness. I can here
@@ -163,19 +161,38 @@ represent multi-component, replicated data items, operations units, how to
 enforce consistency requirements on data. I also need to show somewhere that
 consistency is a property of data.)\\
 
+We have been investigating ways to express consistency properties of
+applications, and came up with an approach that builds upon two observations, the
+first is that consistency is a property of data, not operations. Consistency
+invariants are commonly expressed in terms of a transitions from a state to the
+next by a transactions, and then examining the validity of the new state. It
+makes sense then , to express consistency as a property of data, rather than
+operations, which is what is done in many frameworks (transactions, Cassandra
+consistency policies). Authors of (atomic sets) exploit this observation, and
+introduce new programming language constructs that allow expressing whether
+accesses to data should be linearizable, then depend on the language compiler to
+actually insert synchronization constructs whenever needed. The second
+observation is that, correctness invariants over data are not temporal, hence
+neither is the consistency policy over data. This was explained in (the case for
+invariant-based...bailis). 
+
 % We propose a solution, based on observing that invariants on data are not
 % temporal, as shown by Bailis, also shown before in the work on atomic sets.
-In this paper, we present Data Centric Cloud types, an extension to the cloud
-types distributed programming language, that provides high-level abstractions to replicated
-data and data operations, and enables expressing consistency requirements on
-data items declaratively. We also present the commit protocol that exploits
-consistency information to allow more concurrent operations. The rest of this paper
-is organized as follows: In Section 2 we overview related problems and work,
-that inspired the design of the language and commit protocol or were
-incorporated into them. Section 3 formally describes our languages syntax and
+In this paper, we present Data Centric Cloud Types, a programming language that
+exploits the previous two observations to encode consistency properties as data
+types. Our language is built as an extension to Cloud Types (ref), 
+a distributed programming language that provides high-level abstractions to replicated
+data and operations applied to it. The runtime of our language makes use of
+types encoding 
+consistency information to allow more concurrent operations, potentially
+improving performance. \\
+
+The rest of this paper is organized as follows: In Section 2 we overview related
+work we employed to design and implement the language and its runtime,
+Section 3 formally describes our language's syntax and
 semantics. In Section 4, we describe how the runtime of the language orders
-read/write operations through the commit protocol. Section 5 describes the
-prototypes implementation of the language and shows preliminary evaluation
+read/write operations through the commit protocol, exploiting consistency types. 
+Section 5 describes the current implementation of the language and shows preliminary evaluation
 results. Finally, Section 6 outlines future work and concludes. 
 
 % The idea is to attach consistency policies to data. In the work of atomic
