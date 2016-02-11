@@ -31,14 +31,16 @@ For instance, we can rely solely on eventual consistency, while still providing
 reasonable application behavior for many use-cases, such as:
 
 \begin{enumerate}
+% I think talking about all nodes is not correct here, and I did not mention
+    % before the relations between number of nodes queried and consistency.
 \item Creating twitter-like news feeds. There is no need to query all nodes for
 the most recent versions data in order to display a satisfactory news feed.
 
-\item Creating lists of recommended products based on a user's browse history.
+\item Creating lists of recommended products based on a user's browsing history.
 Such lists need not be made immediately available on all nodes, as we can
-continue to use slightly out of data lists and view them on rendered pages.
+continue to use slightly out of date lists and view them on rendered pages.
 
-\item Counting views on an article, video, photo...etc: It does not matter if
+\item Counting views on an article, video, photo...etc. It does not matter if
 different clients see different values for such counters, as long as these
 views eventually converge to the same value.
 \end{enumerate}
@@ -55,7 +57,6 @@ systems, such as Cassandra(ref) or MongoDB (ref), eventual consistency is the de
 level, and the default configuration requires contacting only a single node in
 order to acknowledge the success of a read or write. (write also cost in terms
 of message rounds).
-
 % However, we cannot enforce all invariants with only eventual consistency
 Of course, there are use cases where nothing other than strong consistency can
 satisfy the correctness invariant. Such as:
@@ -98,7 +99,7 @@ clients across the globe correctly, with competitive performance and
 availability, selecting the correct consistency policy becomes crucial.
 Selecting the strongest policy can have drastic negative effects on availability, while
 resorting to eventual consistency can cause violation of correctness invariants.
-For instance, authors of (MDCC) conducted part of evaluation to their Paxos-based commit
+For instance, authors of (MDCC) conducted a part of evaluation to their Paxos-based commit
 protocol by comparing the performance of TPC-C transactions when executed under eventual consistency  
 , two-phase commit  and their protocol itself. It is not surprising that in all cases, the eventually
 consistent protocol was by far the most
@@ -163,17 +164,18 @@ consistency is a property of data.)\\
 We have been investigating ways to express consistency properties of
 applications, and came up with an approach that builds upon two observations, the
 first is that consistency is a property of data, not operations. Consistency
-invariants are commonly expressed in terms of a transitions from a state to the
-next by a transactions, and then examining the validity of the new state. It
-makes sense then , to express consistency as a property of data, rather than
-operations, which is what is done in many frameworks (transactions, Cassandra
+invariants are most commonly expressed in terms of transitions from a state to the
+next by applying transactions, and then examining the validity of the new state
+in terms of sequential specifications. It makes sense then , to express 
+consistency as a property of data, rather than
+operations, which is nevertheless is done in the majority of frameworks (transactions, Cassandra
 consistency policies). Authors of (atomic sets) exploit this observation, and
 introduce new programming language constructs that allow expressing whether
 accesses to data should be linearizable, then depend on the language compiler to
 actually insert synchronization constructs whenever needed. The second
 observation is that, correctness invariants over data are not temporal, hence
 neither is the consistency policy over data. This was explained in (the case for
-invariant-based...bailis). 
+invariant-based...bailis). \\
 
 % We propose a solution, based on observing that invariants on data are not
 % temporal, as shown by Bailis, also shown before in the work on atomic sets.
@@ -210,8 +212,8 @@ results. Finally, Section 6 outlines future work and concludes.
 
 % Finally we discuss future extensions and possible integration with current
 % storage systems or languages. 
-Replication requires every write issued by system clients to be
-propagated across all replicas. Furthermore, concurrent, or out-of-order writes
-must be ordered in a way that does not violate application correctness criteria.  
+% Replication requires every write issued by system clients to be
+% propagated across all replicas. Furthermore, concurrent, or out-of-order writes
+% must be ordered in a way that does not violate application correctness criteria.  
 
 
