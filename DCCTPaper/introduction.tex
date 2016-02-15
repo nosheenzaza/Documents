@@ -190,7 +190,9 @@ In this paper, we present Data Centric Cloud Types, a programming language that
 exploits the previous two observations to encode consistency properties as data
 types. Our language is built as an extension to Cloud Types (ref), 
 a distributed programming language that provides high-level abstractions to replicated
-data and operations applied to it. The runtime of our language makes use of
+data and operations applied to it. The design of our language supports
+expressing common denormalization(ref) patterns used when designing distributed
+data schemas. The runtime of our language makes use of
 types encoding 
 consistency information to allow more concurrent operations, potentially
 improving performance. We will talk more about cloud types in Section 2.2. \\

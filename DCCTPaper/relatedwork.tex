@@ -28,15 +28,43 @@ maintain correctness invariants (e.g. each call to increment a counter is
 applied). Fig.~\ref{lst:acCounter} shows an example of an atomic set
 declaration. An atomic set, named \emph{a} is declared, and the field \emph{val}
 is added to it. This indicates that all accesses to \emph{val} must be
-serialized. Thus the compiler will insert synchonization blocks around all
+serialized. Thus the compiler will insert synchronization blocks around all
 public methods (referred to as units of work), serializing all accesses from
 outside the object to that field. One could argue that it might be too strict to
 serialize all accesses through public methods, this is not an unusual price to
-pay in such strict (there is a better word here) type systems, but it is
+pay in conservative (there is a better word here) type systems, but it is
 necessary to guarantee type-safety. After compilation, this code will be
 transformed as shown in Fig.~\ref{lst:acCounterCompiled}. It is possible to add
-more than one field to an atomic set, even add fields that belong to different
-objects to the same set. There are also constructs that enable adding 
+more than one field to an atomic set, and even add fields that belong to different
+objects to the same set. It is also possible to create operation specific sets,
+which is useful to avoid high-level data races. For example Fig.... shows the
+code of method \emph{transfer}, which appends all elements in one list to
+another list. To guarantee linearizability, one must ensure that the source and destination
+sets do not change while this operation is progressing. The compiler inserts
+code to acquire locks related to both lists to guarantee linearizable access in
+respect to both lists. The authors managed to use their language to express
+synchronization constraints for the entire Java library, with acceptable
+performance penalty incurred by the conservative nature of the type system. \\
+% Looking at the example in the paper, it is somewhat complex compared to the
+% crude description I have here, I may as well skip it altogether and just
+% mention this simple explanation. 
+The most remarkable aid this framework provides, is that after the progrmmer
+figures out what subsets of data need to be generally atomic, or atomic in
+respect to an operation, this information is encoded
+exactly once, which is not the case when the programmer has to insert
+synchronization code by hand. The policies are now known and enforced, even when
+another programmer modifies code, they will not have to worry about correctly
+synchronizing code (as long as no higher level synchonization is required). \\
+
+We take the idea of atomic sets, and generalize it to include several
+consistency policies. This is done by annotating each set with the desired
+consistency policy, and imposing restrictions on intersections between sets that
+have different consistency policies. Our extensions will be explained in detail in Section 3.1.
+
+\subsection{Cloud Types}
+
+
+
 
 \begin{figure}[tp]
 \begin{lstlisting}
@@ -77,6 +105,19 @@ c.dec();
 \label{lst:acCounterCompiled}
 \end{figure}
 
+
+\begin{figure}[tp]
+\begin{lstlisting}
+class List {
+  atomicset a;
+  atomic(a) int size;
+  atomic(a) Entry header |b = this.a|
+  ....
+}
+\end{lstlisting}
+\caption{Linked List example with addAll method}
+\label{lst:acList}
+\end{figure}
 
 
 
