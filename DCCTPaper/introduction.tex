@@ -171,11 +171,18 @@ consistency as a property of data, rather than
 operations, which is nevertheless is done in the majority of frameworks (transactions, Cassandra
 consistency policies). Authors of (atomic sets) exploit this observation, and
 introduce new programming language constructs that allow expressing whether
-accesses to data should be linearizable, then depend on the language compiler to
-actually insert synchronization constructs whenever needed. The second
-observation is that, correctness invariants over data are not temporal, hence
+accesses to annotated data sets should be linearizable, then depend on the language compiler to
+actually insert synchronization constructs whenever needed. We have extended
+their proposal to support declaring data sets with consistency policies other
+than linearizability. We will cover atomic sets in more detail along with our
+extensions in Section 2.1. \\
+The second observation is that, correctness invariants over data are not temporal, hence
 neither is the consistency policy over data. This was explained in (the case for
-invariant-based...bailis). \\
+invariant-based...bailis). This allows us to attach fixed consistency levels to
+data sets, without sacrificing the expressiveness or flexibility of consistnency
+policy specification, and allowing tractable specification and checking of
+correctness, compatibility and composability of consistency policies over
+several data sets. \\
 
 % We propose a solution, based on observing that invariants on data are not
 % temporal, as shown by Bailis, also shown before in the work on atomic sets.
@@ -186,7 +193,7 @@ a distributed programming language that provides high-level abstractions to repl
 data and operations applied to it. The runtime of our language makes use of
 types encoding 
 consistency information to allow more concurrent operations, potentially
-improving performance. \\
+improving performance. We will talk more about cloud types in Section 2.2. \\
 
 The rest of this paper is organized as follows: In Section 2 we overview related
 work we employed to design and implement the language and its runtime,

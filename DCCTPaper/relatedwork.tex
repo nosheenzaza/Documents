@@ -1,5 +1,115 @@
 %! TEX root = main.tex
 
 
-\section{Related Work}
+\section{Background and Influences}
+This work build upon 3 pillars of work. The main idea to associate consistency
+policies with data comes from the work on atomic sets, which is explained in
+Section 2.1. The language we propose, that incorporates the notion of sets
+annotated with consistency policies, is built on top of Cloud Types, explained
+in Section 2.2. As an example of a consistency policy weaker than than
+serializability but stronger than eventual consistency, we incorporated atomic
+visibility into the language. This consistency level is explained in Section
+2.3. Finally, the commit protocol is an extended version of MDCC(ref) protocol,
+which is paxos-based, and attempts to commit transactions with linearizability
+guarantees.
+% Now that I think about it, I am not sure if this is the most suitable protocol
+% for this framework. I find its use appealing because it does not require
+% locking, and can exploit domain knowledge to optimize committing, however I
+% will consult Fernando later to see if I can use a better protocol. Another
+% thing that makes it appealing to me is that there is an available
+% implementation in Java!
+
+\subsection{Atomic Sets}
+At the heart of this work, is the concept of Atomic Sets (ref). Atomic sets allow 
+expressing synchronization constraints in a
+data-centric manner. Built as an extension to Java, they allow programmers to
+declare sets of objects that require atomic (linearizable) access, in order to
+maintain correctness invariants (e.g. each call to increment a counter is
+applied). Fig.~\ref{lst:acCounter} shows an example of an atomic set
+declaration. An atomic set, named \emph{a} is declared, and the field \emph{val}
+is added to it. This indicates that all accesses to \emph{val} must be
+serialized. Thus the compiler will insert synchonization blocks around all
+public methods (referred to as units of work), serializing all accesses from
+outside the object to that field. One could argue that it might be too strict to
+serialize all accesses through public methods, this is not an unusual price to
+pay in such strict (there is a better word here) type systems, but it is
+necessary to guarantee type-safety. After compilation, this code will be
+transformed as shown in Fig.~\ref{lst:acCounterCompiled}. It is possible to add
+more than one field to an atomic set, even add fields that belong to different
+objects to the same set. There are also constructs that enable adding 
+
+\begin{figure}[tp]
+\begin{lstlisting}
+class Counter {
+  atomicset a;
+  atomic(a) int val;
+  int get() { return val; }
+  void dec() {val--; }
+  void inc { val++; }
+}
+
+Counter c = new Counter();
+c.inc();
+c.dec();
+...
+\end{lstlisting}
+\caption{Counter example using atomic sets}
+\label{lst:acCounter}
+\end{figure}
+
+
+
+\begin{figure}[tp]
+\begin{lstlisting}
+class Counter {
+  (a) int val;
+  int get() { synchronized { return val; } }
+  void dec() { synchronized { val--; } }
+  void inc { synchronized { val++; } }
+}
+
+Counter c = new Counter();
+c.inc();
+c.dec();
+...
+\end{lstlisting}
+\caption{Counter example after compilation}
+\label{lst:acCounterCompiled}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
