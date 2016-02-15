@@ -62,9 +62,102 @@ consistency policy, and imposing restrictions on intersections between sets that
 have different consistency policies. Our extensions will be explained in detail in Section 3.1.
 
 \subsection{Cloud Types}
+Cloud types (ref) are proposed to allow programmers write distributed applications by
+declaring data structures and writing client code that accesses them.
+These types guarantee eventual consistency, and also provide strong consistency
+when needed. Using cloud types, programmers can declare data to be replicated
+and shared on the cloud, the semantics of eventual consistency and conflict
+resolution are hence tied to the data itself. Fig.(...) shows an example of a
+program written using cloud types. 
 
 
+\begin{figure}[tp]
+\begin{lstlisting}
+entity Customer {
+   name: CString
+}
 
+array Product[id: string] {
+  name: CString
+  price: CInt
+}
+
+entity Order(customer: Customer) {
+  time: CTime
+  totalPrice: CInt
+}
+
+array CartItem[customer: Customer, product: Product] {
+  quantity: CInt
+}
+
+array OrderItem[order: Order, product: Product] {
+  quantity: CInt
+  price: CInt
+}
+
+function addToCart(c: Customer, p: Product, q: int) {
+  cartItem[c, p].quantity.add(q)
+}
+
+function deleteCustomer(c: Customer) {
+  delete c
+}
+
+function submitOrder(customer: Customer) {
+  var order = new Order(customer)
+  order.time.set(now());
+
+  foreach cartitem in entries CartItem.quantity 
+    where cartitem.customer == customer {
+      var oitem = OrderItem[order, cartitem.product]
+      oitem.quantity = cartitem.quantity
+      oitem.price = cartitem.quantity * cartitem.product.price
+      cartitem.quantity.add(-oitem.quantity)
+      order.totalprice.add(oitem.price)
+  }
+}
+
+function showOrders(customer: Customer) {
+  foreach order in all Order
+    where order.Customer == customer
+    orderby order.time {    
+    Print("Order of" + order.time)
+    
+    foreach(i in all OrderItem) where i.order == order {
+       Print(i.quantity + " " 
+            + i.product.name + "for" + i.price)
+    }
+  }
+}
+\end{lstlisting}
+\caption{Counter example using atomic sets}
+\label{lst:ctStore}
+\end{figure}
+
+
+\begin{figure}[tp]
+\begin{lstlisting}
+array Seat [row: int, letter: string] {
+  assignedTo: CString
+}
+
+function naiveReserve(seat: Seat, customer: string) {
+  if(seat.assignedTo.get() == "")
+    seat.assignedTo.set(customer)
+  else 
+    print("Reservation failed!")
+}
+
+function goodReserve( seat: Seat, customer: string) {
+  seat.assignedTo.setIfEmoty(customer)
+  flush
+  if(seat.assignedTo.get() != customer) print("Reservation Failed!")
+}
+\end{lstlisting}
+\caption{Cloud types compare-and-set for strong consistency}
+\label{lst:acCmpSet}
+\end{figure}
 
 \begin{figure}[tp]
 \begin{lstlisting}
