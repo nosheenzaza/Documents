@@ -68,7 +68,28 @@ These types guarantee eventual consistency, and also provide strong consistency
 when needed. Using cloud types, programmers can declare data to be replicated
 and shared on the cloud, the semantics of eventual consistency and conflict
 resolution are hence tied to the data itself. Fig.(...) shows an example of a
-program written using cloud types. 
+program written using cloud types. Cloud types are included in a formally
+described, Javascript-like language.
+
+(From here on, extreme spitting what is inside my mind)
+In this language, data types are of two main categories, regular and cloud
+types. Regular types can be used to pass parameters to functions, and as
+indices. Their values are local and not replicated. Cloud types, on the other
+hand Cannot be used as indices, escape manipulating functions or appear in
+expressionss. They can be though of as terminals, where final results of
+computations are written to or initially read from, and nothing else can be done
+to them. Cloud types come with well-defined behavior for merging updates
+proposed by concurrent modifications, in terms of fork-join automata. Compound
+cloud types, which are array and entities (inspired by relational Java) can be
+expressed in terms of more primitive cloud types (e.g. CInt, CString...etc).
+Once the operations
+
+talk about deletes, how array semantics solve certain problems...etc
+
+What is nice about cloud types is that operations are naturally separated into
+the regular generation and manipulation operations, which are local, and to
+operations that actually commit data and make it available for sharing and
+further manipulation, the language also restricts how deleting cloud types
 
 
 \begin{figure}[tp]
