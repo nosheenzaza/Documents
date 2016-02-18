@@ -1,4 +1,44 @@
 %! TEX root = main.tex
 
 
-\section{The  DSL}
+\section{The  Language}
+\subsection{Consistency Level Strength}
+A consistency policy in effect, limits the numbers of orderings of atomic
+operations on an atomic data abstraction. Hence if we use the notion of number
+of allowed permutations of operations as a measure of the strength of
+consistency (there may be as well many other ways to think about a measure of
+consistency strength, but let's stick to this one at the moment), then we can
+come up with the following definitions:
+
+\subsubsection{Consistency level ordering according to strength}
+A consistency level B is comparably weaker than a consistency level A, if it
+allows more permutations of operations than B. Hence, there can be a total order
+of consistency levels A and B, where B < A. The implication here is that we
+cannot have a policy A on a compound data set, where there is a subset annotated
+with consistency level B (invariants guaranteed by A cannot be enforced with B),
+however, the policy of a compound set, that contains a subset named A can 
+
+However, a consistency level B is non-comparably weaker than A is it allows
+permutations that A prohibates. In this case, the same as above applies, but we
+cannot have a total order on A and B, because both A < B and B < A! This means
+that neither A nor B can be made policies on a superset of sets having a policy
+B or A respectively. 
+
+Note that strength of operations also depends on the observer, if we ensure
+separation of local observers in respect to certain data sets, then it is ok to
+enforce local orderings, the strength of these will of course be weaker than
+global policies, from this it follows that local sets have weaker policies than
+global ones.
+
+The parameters then to comparing permutations then are the observer's view,
+nature of operations (I think monotonic operations challenge my logic here), and
+target of operations. I can solve the problem by assuming policies on common
+structures and assuming no knowledge about operations. 
+
+If I add only reads to my system, I can incorporate that into the information flow logic,
+to optimize reads. 
+
+We must not forget that, in order to make the compositional property hold and
+make sense, the consistency policy in question must be composable, that is, make
+sense in the eyes of a more global observer!
+
