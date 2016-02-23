@@ -42,3 +42,34 @@ We must not forget that, in order to make the compositional property hold and
 make sense, the consistency policy in question must be composable, that is, make
 sense in the eyes of a more global observer!
 
+\subsection{How unitfor equivelant affects transaction orderings}
+A serial transaction is a transaction that requires confirmation of all
+operations, and that operations are applied 
+in one atomic step. An eventual transaction required confirmation of all
+operations, but does not require atomic visibility, if an eventual transaction
+fails, all changes are rolled back, respecting the consistency of data sets it
+operates on! 
+
+e have a concept of an observer's (concretely here, transaction issued by a
+client). I view a unitfor, or a consistency policy that spans more than one data
+item as a set with respect to an operation with a larger view, once such a set
+is defined, it becomes a global observer of the combined data items, the
+implication of this, other than the need to serialize reads/writes to both data
+items at once, is that no lower consistency transactions can anymore be issued
+against the larger set (we do not care about the small, more blind transactions
+I think (having doubts here, maybe depends whether they modify contents vs
+context)), further more, all operations of transactions with the same
+consistency is respect to a data item are serialized. 
+
+After actually writing down the above, I think it is clear that consistency with
+respect to an operation actually means setting a minumum consistency level for
+the large set! which is enforced for other future operations to be defined. So
+it is still data centric, and comes from the need of maintaining an invariant
+for an operation. 
+
+I think a transfer construct can be useful, as different rules apply to
+trasferring from weak -> strong set or vice versa, concerning visibility of both
+operations. 
+
+Many operations are transfers and reflections of state, I think they deserve
+their own constructs. 

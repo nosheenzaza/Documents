@@ -19,6 +19,15 @@ guarantees.
 % thing that makes it appealing to me is that there is an available
 % implementation in Java!
 
+% Another way to talk about this chapter is to mention the ideas we built upon,
+% and the research that motivated them, the ideas are: consistency as a property
+% of data, consistency as a permanent property of data.
+
+% Now I am thinking that there are two types of operations that happen to data,
+% placement and manipulation, Thing is that the way a proposed updated value is
+% calculated may have nothing to do with the object itself, here we do not care
+% about that, but we do care about where it came from. 
+
 \subsection{Atomic Sets}
 At the heart of this work, is the concept of Atomic Sets (ref). Atomic sets allow 
 expressing synchronization constraints in a
@@ -89,7 +98,8 @@ talk about deletes, how array semantics solve certain problems...etc
 What is nice about cloud types is that operations are naturally separated into
 the regular generation and manipulation operations, which are local, and to
 operations that actually commit data and make it available for sharing and
-further manipulation, the language also restricts how deleting cloud types
+further manipulation, the language also restricts the concept of deletion, in
+order to avoid 
 
 
 \begin{figure}[tp]
