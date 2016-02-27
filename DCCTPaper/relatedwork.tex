@@ -91,10 +91,24 @@ declaring data items, and assigning them types that encode the following:
 \begin{enumerate}
   \item Whether the data is local, or shared and replicated.
   \item The merge policy of concurrent updates.
-  \item 
 \end{enumerate}
-and writing client code that accesses them.
-These types guarantee eventual consistency, and also provide strong consistency
+A language containing these types is also proposed, in order to help programmers
+write simple mobile applications that require replication of state among mobile
+devices and a cluster of servers. The design of the language guarantees eventual
+consistency semantics, without needing much programmer intervention. The design
+if the language makes solving common distributed data storage problems easier.
+For instance, the language provide basic cloud types, along with higher level
+operations that precisely define the behavior of the program when calling these
+operations concurrently. From these types, compounds types, such as entities,
+lists and sets can be defined, again with clearn and intuitive consistency
+semantics. Furthermore, the design of arrays (which are more like maps in
+regular programming langauges) in the language makes assigning
+unique keys to entities, and deleting entities less problematic in the presence
+of concurrent operations (mention somewhere that these are designed after Chen's
+relations). We will now explain cloud types, entities and arrays in detail through
+the example in Fig.smth
+
+Other than guaranteeing eventual consistency,the language also provide strong consistency
 when needed. Using cloud types, programmers can declare data to be replicated
 and shared on the cloud, the semantics of eventual consistency and conflict
 resolution are hence tied to the data itself. Fig.(...) shows an example of a

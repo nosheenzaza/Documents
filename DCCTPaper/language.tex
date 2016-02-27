@@ -2,6 +2,18 @@
 
 
 \section{The  Language}
+I need to describe it through my somewhat complicated example, then show the
+possible orderings of operations based on the consistency levels. I will also
+show legal and illegal consistency policy nestings. The latter examples, should
+be done maybe after explaining the theory on consistency level combinations.
+Other than that. 
+
+\section{An Online Shopping Example}
+This example introduces a data schema that is denormalized. Denormalization is a
+common strategy in industry when designing distributed data storage. This is
+because joining data from 
+
+
 \subsection{Consistency Level Strength}
 A consistency policy in effect, limits the numbers of orderings of atomic
 operations on an atomic data abstraction. Hence if we use the notion of number
@@ -75,3 +87,34 @@ Many operations are transfers and reflections of state, I think they deserve
 their own constructs. 
 
 \subsection{Transaction Semantics in the Language}
+The definition of a transaction in this language differs from a common transaction in a
+relational database. While a common transaction ensures atomicity, consistency, isolation.
+durability and durability. The basic propoerty of a transaction in our system in
+durability and consistency, atomicity and isolation of the transaction depend on
+the data it manipulates, the consistency depends on the consistency policy of
+the sets a transacton touches, and the isolation level again depends on the
+consistency level of touched data. \\
+
+Assume we have a basic transaction, operating on data with no consistnecy
+annotations. The only guarantee of such transactions is that the success of the
+transaction is not reported until all sub-operations have reported success. In
+the case of a transaction that touches both strong and weak sets, the success
+of the transaction is reported according to the sets it touches. The overall
+consistency of such a transaction is that of the weaker set. 
+
+Ramp Transaction (what was exactly the difference between that and snapshot
+isolation?) guarantees that all subsequent reads or writes will observe that
+different parts of a data item are consistent.
+
+Strong Transaction ensures isolation and consistency, like a strict transaction. 
+The runtime system orders reports transaction success and orders transactions depending on the desired consistency
+level.
+
+When a transaction fails to commit, rollback is not the only options, For
+example, in the case of index and data, we can deffer creating the index instead
+of the costly operation of rolling back the consistency data. In case of
+shopping, if a checkout fails, we can r
+
+
+
+
