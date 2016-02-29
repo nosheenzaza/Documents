@@ -77,7 +77,45 @@ After actually writing down the above, I think it is clear that consistency with
 respect to an operation actually means setting a minumum consistency level for
 the large set! which is enforced for other future operations to be defined. So
 it is still data centric, and comes from the need of maintaining an invariant
-for an operation. 
+for an operation.
+
+The above reformulated:
+Let's think about consistency polices as means of preserving invariants through 
+limiting possible operation interleavings. Let's also claim that an Invariant violation 
+is only detected by actually reading all data items affected by some update, this is 
+intuitive to see because, we can agree that updates in a linearisable transaction 
+updating many items will not happen instantaneously to all the items, and this is 
+acceptable as long as observing all the items happens right after, or if writes that 
+are based on a subset of values written in such a transaction happen after all the
+updates of that subset. Once we introduce an operation, with an invariant that requires 
+observing a data item, composed of multiple data items as one atomic item, then any other 
+operation on that composed atomic item must not have a weaker consistency policy, or else 
+we cannot guarantee the operation with a higher consistency, be it read or write will be
+able to observe the invariant or maintain it. We can see that, what we did indirectly was 
+to attach a new policy that is actually data centric, to the compound atomic data item 
+touched by a transaction. This means that, whenever we have at least one operation of a 
+compound data item with a certain consistency level, this consistency level represents 
+the lowest allowed consistency of any other operations that operate of the scale of that 
+compound data item, and hence it make sense to annotate the compound data item with that
+consistency level. With the rules we have already defined about the consistency of 
+operations on component data items, we can see that the system is not stricter that what 
+is actually needed. \\
+
+Note that, it is possible that a transaction commit protocol can actually commit
+a transaction that preserves strong consistency without actually coordinating
+with as many nodes as usually needed, assuming no other transaction depending on
+the current one is running, we can actually run the transaction as if it
+requires only eventual consistency (Eduardo's work). However note that this is
+merely an optimization. In the language, the programmer still needs to annotate
+the transactions in a way to preserve the semantics of the language. \\
+
+A programmer may still want to annotate a transaction with a policy, if, for
+instance, what is needed is reading the data quickly, without caring about the
+consistency level. Such transactions will not be allowed to write back, or
+anywhere that expects strongly consistent data.
+
+
+
 
 I think a transfer construct can be useful, as different rules apply to
 trasferring from weak -> strong set or vice versa, concerning visibility of both
