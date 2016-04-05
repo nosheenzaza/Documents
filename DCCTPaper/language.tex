@@ -2,14 +2,121 @@
 
 
 \section{The  Language}
+
 I need to describe it through my somewhat complicated example, then show the
 possible orderings of operations based on the consistency levels. I will also
-show legal and illegal consistency policy nestings. The latter examples, should
+show legal and illegal consistency policy nestings. Show possible mistakes that
+can be made when there are no policies. This can happen when I describe the
+implementation of the framework. The latter examples, should
 be done maybe after explaining the theory on consistency level combinations.
 Other than that. 
 
 \section{An Online Shopping Example}
 This example introduces a data schema that is denormalized. Denormalization is a
 common strategy in industry when designing distributed data storage. This is
-because joining data from 
+because joining data from different tables, located on diverse nodes is a costly
+operation, hence every column (I need to explain somewhere what a column means
+in general) is duplicated. In fact, even in traditional relational systems,
+views of tables were supported, which is somehow similar to denormalizing data
+for performance (refs). In our language, we support declaring views along with
+their relationships and consistency policy in relation to the original tables.
+
+\begin{figure}[tp]
+\begin{lstlisting}
+
+entity Customer {
+   name: CString 
+   country: Country
+   paymentMethod: CString
+   paymentInfo: CString
+}
+
+// must be serial or we cannot guarantee that the order will take 
+// the money from the correct payment method
+@ serial set (paymentInfo)
+
+entity CustomerSettings {
+this may read a "ramp" version of the address and the payment method,
+because it will be eventually consistent, we do not care
+// what is nice now is that we cannot read from this set by mistake to 
+the shipping queue!
+}
+
+// All readers observe the same version of payment method and info
+// no weird things can happen such as payment method with older payment info
+// things such as client still seeing old payment info can happen, but it is
+fine (for us)
+@snapshot set payment (Customer.paymentMethod, Customer.paymentInfo)
+
+array Product[id: string] {
+  name: CString
+  price: CInt
+  // anonymous set
+  @serial set quantity: CInt // to guarantee that the stock appears at the
+  latest version everywhere.
+}
+
+// arranged like this so orders are deleted when customers are, but actually I
+do not care about that.
+
+entity Order(customer: Customer) {
+  time: CTime
+}
+
+array OrderItem[order: Order, product: Product] {
+  quantity: CInt
+  price: CInt
+}
+
+array CartItem[customer: Customer, product: Product] {
+  quantity: CInt
+}
+
+entity OrderQueue {
+  customer
+  address // critical not to ship to an old address, hence serial, to force the
+  latest version.
+  amount
+}
+
+
+
+function addToCart(c: Customer, p: Product, q: int) {
+  cartItem[c, p].quantity.add(q)
+}
+
+function deleteCustomer(c: Customer) {
+  delete c
+}
+
+function submitOrder(customer: Customer) {
+  var order = new Order(customer)
+  order.time.set(now());
+
+  foreach cartitem in entries CartItem.quantity 
+    where cartitem.customer == customer {
+      var oitem = OrderItem[order, cartitem.product]
+      oitem.quantity = cartitem.quantity
+      oitem.price = cartitem.quantity * cartitem.product.price
+      cartitem.quantity.add(-oitem.quantity)
+      product.quantity.add(-oitem.quantity))
+  }
+
+function showOrders(customer: Customer) {
+  foreach order in all Order
+    where order.Customer == customer
+    orderby order.time {    
+    Print("Order of" + order.time)
+    
+    foreach(i in all OrderItem) where i.order == order {
+       Print(i.quantity + " " 
+            + i.product.name + "for" + i.price)
+    }
+  }
+}
+\end{lstlisting}
+\caption{Customer database example with atomic set declarations}
+\label{lst:ctStore}
+\
+
 

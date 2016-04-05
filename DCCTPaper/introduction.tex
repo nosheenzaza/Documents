@@ -14,21 +14,20 @@ However, managing the consistency of replicated data is a well-known, nontrivial
 problem. Ideally, all clients must observe the most recent, correct (according to
 application specification) data at all times. This ideal consistency model is what
 strict serializability transaction isolation level (ref) provides. However, it
-is typically costly to provide this level of consistency.  Strict
+is typically costly to maintain this level of consistency.  Strict
 serializability is commonly implemented using two-phase commit(ref), which does not
 tolerate node failure and required a leader, which introduces a single point of
-failure. Current advanced
-approaches, such as paxos-based commit protocols(refs) or three-phase commit(ref),
+failure. Current advanced approaches, such as Paxos-based commit protocols(refs) or three-phase commit(ref),
 require a quorum of replicas to be up, a large number of messages or very
 specific domain knowledge. \\  %elaborate later on, good discussion in MDCC paper.
 
 % Do we always need strong consistency?
 For many systems, achieving this strong consistency level is unrealistic given
-the implied costs. Furthermore, it is possible to enforce many useful and common
+the implied costs. Furthermore, it is possible to enforce many useful, common
 application correctness criteria without needing strict serializability. 
 % We can use eventual consistency for the following with the following benefits
 For instance, we can rely solely on eventual consistency, while still providing
-reasonable application behavior for many use-cases, such as:
+reasonable application behavior for the following use-cases:
 
 \begin{enumerate}
 % I think talking about all nodes is not correct here, and I did not mention
@@ -46,24 +45,22 @@ views eventually converge to the same value.
 \end{enumerate}
 
 We can observe from the previous list, that due to the probabilistic nature and 
-inherent non-determinism of many Internet applications, it is possible to exploit 
+inherent non-determinism of many web applications, it is possible to exploit 
 eventual consistency, and provide correct (albeit relaxed) application behavior, 
 very likely at a cost that is orders of magnitude cheaper than strict serializability 
-or other stronger consistency levels. 
-
-% How common is eventual consistency? What is the possible cost?
-For many commercial distributed storage
+or other stronger consistency levels. For many commercial distributed storage 
 systems, such as Cassandra(ref) or MongoDB (ref), eventual consistency is the default
 level, and the default configuration requires contacting only a single node in
 order to acknowledge the success of a read or write. (write also cost in terms
-of message rounds).
+of message rounds). \\
+
 % However, we cannot enforce all invariants with only eventual consistency
-Of course, there are use cases where nothing other than strong consistency can
+On the other hand, there are use cases where nothing other than strong consistency can
 satisfy the correctness invariant. Such as:
 
 \begin{enumerate}
 
-\item Assigning non abritrary, unique identifuers, such as unique user names or
+\item Assigning non arbitrary, unique identifiers, such as unique user names or
 ascending serial numbers. (ref bailis)
 
 \item Maintaining consistency of counters supporting arbitrary operations, such
@@ -87,26 +84,63 @@ password with a reset token and using it only once.
 \begin{enumerate}
 \item Maintaining materialized views.
 \item Maintaining foreign key constraints.
-\item Maintaining materialized views.
 \end{enumerate}
 
 % The problem is that using all these consistency levels in applications 
 % is not easy to express or reason about. 
 It is not hard to find many distributed applications that include use cases
 requiring more than one of the consistency models we described here, such as social media
-platforms, E-commerce, games...etc. When these applications must service millions of
+platforms, e-commerce and online gaming. When these applications must service millions of
 clients across the globe correctly, with competitive performance and
 availability, selecting the correct consistency policy becomes crucial.
-Selecting the strongest policy can have drastic negative effects on availability, while
+Selecting the strongest policy can have drastically negative effects on availability, while
 resorting to eventual consistency can cause violation of correctness invariants.
-For instance, authors of (MDCC) conducted a part of evaluation to their Paxos-based commit
-protocol by comparing the performance of TPC-C transactions when executed under eventual consistency  
-, two-phase commit  and their protocol itself. It is not surprising that in all cases, the eventually
-consistent protocol was by far the most
-performant. However, using only this consistency level cannot guarantee that
-some transactions, such as the product buy request will behave correctly, as
-this would require strong consistency to maintain the invariant that stock must
-remain positive (assuming this is an application requirement!) \\
+Support for multiple levels of consistency has always been supported in some
+form, ever since relational databases were introduced, in the form of
+transaction isolation levels (ref), to current distributed key-value stores.
+However, this support, in past and present, has suffered from many problems,
+which we go over in the following sections:
+
+\subsection{Divide in Philosophy}
+
+
+\subsection{Data and Operation Abstractions}
+
+\subsection{Replica agreement and }
+
+\subsection{Poor Definitions of Consistency}
+
+\subsection{No Theory on Mixing Consistency Policies}
+
+\subsection{Two-dimensional Replication is Tiresome}
+
+
+
+
+% So far talking about what kinds of use cases require which consistency levels,
+% now will talk about how frameworks do not facilitate that, because it is not
+% so easy to reason about it, and how consistency requirements are defined in
+% terms of replica state as well as data integrity, not both.
+
+
+
+I could have a list of properties and consistency criteria
+I could mention, as an example of the support, zookeeper with eventual stores,
+then RDBMS systems with fake lineriazbility.
+
+Then mention our overall approach.
+
+%For instance, authors of (MDCC) conducted a part of evaluation to their Paxos-based commit
+%protocol by comparing the performance of TPC-C transactions when executed under eventual consistency  
+%, two-phase commit  and their protocol itself. It is not surprising that in all cases, the eventually
+%consistent protocol was by far the most
+%performant. However, using only this consistency level cannot guarantee that
+%some transactions, such as the product buy request will behave correctly, as
+%this would require strong consistency to maintain the invariant that stock must
+%remain positive, and one item is not sold to two different people. (assuming
+%these are application requirements) \\
+
+In recent years, 
 
 % How are consistency policies defined? In terms of what?
 % I think i will move this def upwards when I start talking about strict
@@ -192,7 +226,8 @@ types. Our language is built as an extension to Cloud Types (ref),
 a distributed programming language that provides high-level abstractions to replicated
 data and operations applied to it. The design of our language supports
 expressing common denormalization(ref) patterns used when designing distributed
-data schemas. The runtime of our language makes use of
+data schemas. It also supports specifying consistency requirements for views as
+a core issue not an orthogonal one. The runtime of our language makes use of
 types encoding 
 consistency information to allow more concurrent operations, potentially
 improving performance. We will talk more about cloud types in Section 2.2. \\

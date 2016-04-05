@@ -2,7 +2,7 @@
 
 \section{Conclusion and Future Work}
 
-Including session properties as well as exploiting operations properties, optimistically writing to one replica and wait for 
+Including more consistency levels. Including session properties as well as exploiting operations properties, optimistically writing to one replica and wait for 
 optimistic reply.
 
 Handle the problem of consistencies in a box.
@@ -11,3 +11,14 @@ Apply these concepts to a "real" programming language, and find a way to avoid
 having to define the fork-join automata, as it can be tricky. Also find a way to
 define "container" data structures, instead of just having the list, the
 iterable entities and sets.
+
+Explicitly ordering requests? e.g. order function always takes prices that were
+visible when client made a request?
+
+
+Support for an update construct?
+
+When I added the address, I thought that it could be the case that a client
+changed his address (from a laptop), but cannot see that reflected on another
+device, possible to send a sync request for a newer version, in which case we
+search for a newer version? Seems like a trivial thing though.
