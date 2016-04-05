@@ -13,8 +13,8 @@ When implemented correctly, replication can greatly improve availability and per
 However, managing the consistency of replicated data is a well-known, nontrivial
 problem. Ideally, all clients must observe the most recent, correct (according to
 application specification) data at all times. This ideal consistency model is what
-strict serializability transaction isolation level (ref) provides. However, it
-is typically costly to maintain this level of consistency.  Strict
+strict serializability transaction isolation level(ref) provides. However, it
+is typically costly to maintain this level of consistency. Strict
 serializability is commonly implemented using two-phase commit(ref), which does not
 tolerate node failure and required a leader, which introduces a single point of
 failure. Current advanced approaches, such as Paxos-based commit protocols(refs) or three-phase commit(ref),
@@ -49,10 +49,10 @@ inherent non-determinism of many web applications, it is possible to exploit
 eventual consistency, and provide correct (albeit relaxed) application behavior, 
 very likely at a cost that is orders of magnitude cheaper than strict serializability 
 or other stronger consistency levels. For many commercial distributed storage 
-systems, such as Cassandra(ref) or MongoDB (ref), eventual consistency is the default
+systems, such as Cassandra(ref) or MongoDB(ref), eventual consistency is the default
 level, and the default configuration requires contacting only a single node in
-order to acknowledge the success of a read or write. (write also cost in terms
-of message rounds). \\
+order to acknowledge the success of a read or write. \\
+%(write also cost in terms of message rounds). 
 
 % However, we cannot enforce all invariants with only eventual consistency
 On the other hand, there are use cases where nothing other than strong consistency can
@@ -61,7 +61,7 @@ satisfy the correctness invariant. Such as:
 \begin{enumerate}
 
 \item Assigning non arbitrary, unique identifiers, such as unique user names or
-ascending serial numbers. (ref bailis)
+ascending serial numbers.(ref Peter Bailis work)
 
 \item Maintaining consistency of counters supporting arbitrary operations, such
 as bank account balance, or stock of an item. 
@@ -97,7 +97,7 @@ Selecting the strongest policy can have drastically negative effects on availabi
 resorting to eventual consistency can cause violation of correctness invariants.
 Support for multiple levels of consistency has always been supported in some
 form, ever since relational databases were introduced, in the form of
-transaction isolation levels (ref), to current distributed key-value stores.
+transaction isolation levels(ref), to current distributed key-value stores.
 However, this support, in past and present, has suffered from many problems,
 which we go over in the following sections:
 
@@ -232,13 +232,13 @@ database communities. We describe these observations on the following sections.
 
 \subsubsection{Consistency is a Property of Data}
 The consistency level is typically defined on operations, or, in other words, it
-is the reponsibility of operations to enforce a certain consistency level.
+is the responsibility of operations to enforce a certain consistency level.
 However, we can flip this reasoning if we consider that consistency
 invariants are most commonly expressed in terms of transitions from one correct
 state of data to the next by applying a sequence of operations (e.g.
 transactions), and then examining the validity of the new state
 in terms of sequential specifications. It makes sense then , to declare
-consistency as a property of data, rather than. Authors of (atomic sets)(ref) exploit this observation, and
+consistency as a property of data, rather than. Authors of Atomic Jave~\cite{Vaziri:2006:ASC:1111320.1111067} exploit this observation, and
 introduce new programming language constructs that allow expressing whether
 accesses to annotated data sets should be linearizable. The language compiler
 then actually inserts synchronization constructs whenever needed. We have extended
@@ -248,7 +248,8 @@ extensions in Section 2.1. \\
 
 \subsubsection{Consistency Properties are not Temporal}
 The second observation is that, correctness invariants over data are not temporal, hence
-neither is the consistency level needed to maintain it. This was explained in (the case for
+neither is the consistency level needed to maintain it. This was explained
+in~\cite{bailis2014coordination} (the case for
 invariant-based...bailis). This means that attaching fixed consistency levels to
 data sets does not sacrifice the expressiveness or flexibility of consistnency
 policy specifications, and at the same time allows tractable specification and checking of
