@@ -2,9 +2,9 @@
 
 
 \section{Background and Influences}
-This work builds upon 3 pillars of work. The main idea to associate consistency
-policies with data comes from the work on atomic sets, which is explained in
-Section 2.1. The language we propose, that incorporates the notion of sets
+Our system model and language builds upon 3 pillars of related work. The main
+idea is to associate consistency policies with data, and it comes from the work on atomic sets, 
+which is explained in Section 2.1. The language we propose, that incorporates the notion of sets
 annotated with consistency policies, is built on top of Cloud Types, explained
 in Section 2.2. As an example of a consistency policy weaker than than
 serializability but stronger than eventual consistency, we incorporated atomic
@@ -41,203 +41,21 @@ serialized. Thus the compiler will insert synchronization blocks around all
 public methods (referred to as units of work), serializing all accesses from
 outside the object to that field. One could argue that it might be too strict to
 serialize all accesses through public methods, this is not an unusual price to
-pay in conservative (there is a better word here) type systems, but it is
+pay in conservative type systems, but it is
 necessary to guarantee type-safety. After compilation, this code will be
-transformed as shown in Fig.~\ref{lst:acCounterCompiled}. \\
-
-% TODO add a simplified version of the list example, or create an example that
-% involves only two variables. It is good for myself though to look again at the
-% list example later on.
-
-% Looking at the example in the paper, it is somewhat complex compared to the
-% crude description I have here, I may as well skip it altogether and just
-% mention this simple explanation. 
-The most remarkable aid this framework provides, is that after the progrmmer
-It is possible to add
-more than one field to an atomic set, and even add fields that belong to different
+transformed as shown in Fig.~\ref{lst:acCounterCompiled}.In this language. 
+It is possible to add more than one field to an atomic set, 
+and even add fields that belong to different
 objects to the same set. It is also possible to create operation specific sets,
-which is useful to avoid high-level data races. For example Fig.... shows the
-code of method \emph{transfer}, which appends all elements in one list to
-another list. To guarantee linearizability, one must ensure that the source and destination
-sets do not change while this operation is progressing. The compiler inserts
-code to acquire locks related to both lists to guarantee linearizable access in
-respect to both lists. The authors managed to use their language to express
-synchronization constraints for the entire Java library, with acceptable
-performance penalty incurred by the conservative nature of the type system. \\
-
-figures out what subsets of data need to be generally atomic, or atomic in
-respect to an operation, this information is encoded
-exactly once, which is not the case when the programmer has to insert
-synchronization code by hand. The policies are now known and enforced, even when
-another programmer modifies code, they will not have to worry about correctly
-synchronizing code (as long as no higher level synchonization is required). \\
-
-% This whole thing needs to be mentioned earlier
-Atomic sets also make the fact that consistency is a property of data explicit.
-It is worth mentioning that other proposals support this claim. Many theoretical
-models, such as [ref to coordination avoidance paper and try to locate the rest]
-describe correctness invariants in terms of data states. A consistency level
-guarantees invariant maintenance and, in that sense is also directly related to
-data.
-
-We take the idea of atomic sets, and generalize it to include several
-consistency policies. This is done by annotating each set with the desired
-consistency policy, and imposing restrictions on intersections between sets that
-have different consistency policies. Our extensions will be explained in detail in Section 3.1.
-
-\subsection{Cloud Types}
-Cloud types (ref) are proposed to allow programmers write distributed applications by
-declaring data items, and assigning them types that encode the following:
-\begin{enumerate}
-  \item Automatic sharing and replication of data.
-  \item The merge policy of concurrent updates.
-\end{enumerate}
-A language containing these types was proposed in this work in order to help programmers
-write simple mobile applications that require replication of state among mobile
-devices and a cluster of servers. The design of the language guarantees eventual
-consistency semantics, without needing much programmer intervention. This
-language makes solving common distributed data storage problems easier. For
-instance, Fig.(something) shows an application that operates on an online shop
-(explain later using the later paragraphs...)
-
-From these types, compound cloud types, such as entities,
-lists and sets can be defined, again with clean and intuitive consistency
-semantics. Furthermore, the design of arrays (which are more like maps in
-regular programming langauges) in the language makes assigning
-unique keys to entities, and deleting entities less problematic in the presence
-of concurrent operations (mention somewhere that these are designed after Chen's
-relations). We will now explain cloud types, entities and arrays in detail through
-the example in Fig.smth
-
-Other than guaranteeing eventual consistency,the language also provide strong consistency
-when needed. Using cloud types, programmers can declare data to be replicated
-and shared on the cloud, the semantics of eventual consistency and conflict
-resolution are hence tied to the data itself. Fig.(...) shows an example of a
-program written using cloud types. Cloud types are included in a formally
-described, Javascript-like language.
-
-(From here on, extreme spitting what is inside my mind)
-In this language, data types are of two main categories, regular and cloud
-types. Regular types can be used to pass parameters to functions, and as
-indices. Their values are local and not replicated. Cloud types, on the other
-hand Cannot be used as indices, escape manipulating functions or appear in
-expressions. They can be thought of as terminals, where final results of
-computations are written to, or initially read from, and nothing else can be done
-to them. Cloud types come with well-defined behavior for merging updates
-proposed by concurrent modifications, in terms of fork-join automata. Compound
-cloud types, which are array and entities (inspired by relational Java) can be
-expressed in terms of more primitive cloud types (e.g. CInt, CString...etc).
-Once the operations
-
-talk about deletes, how array semantics solve certain problems...etc
-
-What is nice about cloud types is that operations are naturally separated into
-the regular generation and manipulation operations, which are local, and to
-operations that actually commit data and make it available for sharing and
-further manipulation, the language also restricts the concept of deletion
-
-We modify and extend this language to support partial replicas on clients that
-do not get updated in one atomic step, and managing replication among a cluster 
-of servers. We build consistency sets on
-top of the language. In the following chapter, we introduce our language through
-examples, and show sample runs of allowed and disallowed operations
-interleavings based on the consistency sets. In later chapters we describe the language in detail.
-
-\begin{figure}[tp]
-\begin{lstlisting}
-entity Customer {
-   name: CString
-}
-
-array Product[id: string] {
-  name: CString
-  price: CInt
-}
-
-entity Order(customer: Customer) {
-  time: CTime
-  totalPrice: CInt
-}
-
-array CartItem[customer: Customer, product: Product] {
-  quantity: CInt
-}
-
-array OrderItem[order: Order, product: Product] {
-  quantity: CInt
-  price: CInt
-}
-
-function addToCart(c: Customer, p: Product, q: int) {
-  cartItem[c, p].quantity.add(q)
-}
-
-function deleteCustomer(c: Customer) {
-  delete c
-}
-
-function submitOrder(customer: Customer) {
-  var order = new Order(customer)
-  order.time.set(now());
-
-  foreach cartitem in entries CartItem.quantity 
-    where cartitem.customer == customer {
-      var oitem = OrderItem[order, cartitem.product]
-      oitem.quantity = cartitem.quantity
-      oitem.price = cartitem.quantity * cartitem.product.price
-      cartitem.quantity.add(-oitem.quantity)
-      order.totalprice.add(oitem.price)
-  }
-}
-
-function showOrders(customer: Customer) {
-  foreach order in all Order
-    where order.Customer == customer
-    orderby order.time {    
-    Print("Order of" + order.time)
-    
-    foreach(i in all OrderItem) where i.order == order {
-       Print(i.quantity + " " 
-            + i.product.name + "for" + i.price)
-    }
-  }
-}
-\end{lstlisting}
-\caption{Customer database example in a language that contains atomic sets}
-\label{lst:ctStore}
-\end{figure}
-
-
-\begin{figure}[tp]
-\begin{lstlisting}
-array Seat [row: int, letter: string] {
-  assignedTo: CString
-}
-
-function naiveReserve(seat: Seat, customer: string) {
-  if(seat.assignedTo.get() == "")
-    seat.assignedTo.set(customer)
-  else 
-    print("Reservation failed!")
-}
-
-function goodReserve( seat: Seat, customer: string) {
-  seat.assignedTo.setIfEmoty(customer)
-  flush
-  if(seat.assignedTo.get() != customer) print("Reservation Failed!")
-}
-\end{lstlisting}
-\caption{Cloud types compare-and-set for strong consistency}
-\label{lst:acCmpSet}
-\end{figure}
-
+which is useful to avoid high-level data races(ref)
+ 
 \begin{figure}[tp]
 \begin{lstlisting}
 class Counter {
   atomicset a;
   atomic(a) int val;
-  int get() { return val; }
-  void dec() {val--; }
+  int get() {return val;}
+  void dec() { val--; }
   void inc { val++; }
 }
 
@@ -246,16 +64,14 @@ c.inc();
 c.dec();
 ...
 \end{lstlisting}
-\caption{Counter example using atomic sets}
+\caption{Counter example with one atomic set declaration}
 \label{lst:acCounter}
 \end{figure}
-
-
 
 \begin{figure}[tp]
 \begin{lstlisting}
 class Counter {
-  (a) int val;
+  int val;
   int get() { synchronized { return val; } }
   void dec() { synchronized { val--; } }
   void inc { synchronized { val++; } }
@@ -270,19 +86,208 @@ c.dec();
 \label{lst:acCounterCompiled}
 \end{figure}
 
+% TODO add a simplified version of the list example, or create an example that
+% involves only two variables. It is good for myself though to look again at the
+% list example later on.
 
+% Looking at the example in the paper, it is somewhat complex compared to the
+% crude description I have here, I may as well skip it altogether and just
+% mention this simple explanation. 
+The most remarkable aid this framework provides, is that after the programmer
+has reasoned about sets of data that need to be updated atomically. Every
+future operation on that data is automatically synchronized, and the fact that
+data needs synchronization is known and enforced. The authors used their language to express
+synchronization constraints for the entire Java library, with acceptable
+performance penalty incurred by the conservative nature of the type system. \\
+
+%. For example Fig.... shows the
+%code of method \emph{transfer}, which appends all elements in one list to
+%another list. To guarantee linearizability, one must ensure that the source and destination
+%sets do not change while this operation is progressing. The compiler inserts
+%code to acquire locks related to both lists to guarantee linearizable access in
+%respect to both lists. 
+
+
+%figures out what subsets of data need to be generally atomic, or atomic in
+%respect to an operation, this information is encoded
+%exactly once, which is not the case when the programmer has to insert
+%synchronization code by hand. The policies are now known and enforced, even when
+%another programmer modifies code, they will not have to worry about correctly
+%synchronizing code (as long as no higher level synchonization is required). \\
+
+%This whole thing needs to be mentioned earlier
+%Atomic sets also make the fact that consistency is a property of data explicit.
+%It is worth mentioning that other proposals support this claim. Many theoretical
+%models, such as [ref to coordination avoidance paper and try to locate the rest]
+%describe correctness invariants in terms of data states. A consistency level
+%guarantees invariant maintenance and, in that sense is also directly related to
+%data.
+%
+We take the idea of atomic sets, and generalize it to include several
+consistency policies. This is done by annotating each set with the desired
+consistency policy, and imposing restrictions on merging and nesting of sets that
+hold differing consistency policies. Our extensions will be explained in detail
+in Section 4.1.
+
+\subsection{Cloud Types}
+Cloud types(ref) are proposed to allow programmers write distributed applications by
+declaring data items, and assigning them types that encode sharing and
+replication properties of data, and the merge policy of concurrent updates. A language containing 
+these types was proposed in the same paper in order to help programmers
+write simple mobile applications that require full replication of state among mobile
+devices and a cluster of servers. The design of the language guarantees eventual
+consistency semantics, without needing much programmer intervention. This
+language makes solving common distributed data storage problems easier. For
+instance, Fig.(something) shows an application that operates on an online shop
 \begin{figure}[tp]
 \begin{lstlisting}
-class List {
-  atomicset a;
-  atomic(a) int size;
-  atomic(a) Entry header |b = this.a|
-  ....
+entity Customer {
+   name: CString
+}
+array Product[id: string] {
+  name: CString
+  price: CInt
+}
+entity Order(customer: Customer) {
+  time: CTime
+  totalPrice: CInt
+}
+array CartItem[customer: Customer, product: Product] {
+  quantity: CInt
+}
+array OrderItem[order: Order, product: Product] {
+  quantity: CInt
+  price: CInt
+}
+function addToCart(c: Customer, p: Product, q: int) {
+  cartItem[c, p].quantity.add(q)
+}
+function deleteCustomer(c: Customer) {
+  delete c
+}
+function submitOrder(customer: Customer) {
+  var order = new Order(customer)
+  order.time.set(now());
+
+  foreach cartitem in entries CartItem.quantity 
+    where cartitem.customer == customer {
+      var oitem = OrderItem[order, cartitem.product]
+      oitem.quantity = cartitem.quantity
+      oitem.price = cartitem.quantity * cartitem.product.price
+      cartitem.quantity.add(-oitem.quantity)
+      order.totalprice.add(oitem.price)
+  }
+}
+function showOrders(customer: Customer) {
+  foreach order in all Order
+    where order.Customer == customer
+    orderby order.time {    
+    Print("Order of" + order.time)
+    
+    foreach(i in all OrderItem) where i.order == order {
+       Print(i.quantity + " " 
+            + i.product.name + "for" + i.price)
+    }
+  }
 }
 \end{lstlisting}
-\caption{Linked List example with addAll method}
-\label{lst:acList}
+\caption{Customer database example using Cloud Types} 
+\label{lst:ctStore}
 \end{figure}
+
+The program seems simple, however, behind the scenes, all entities, arrays and C-types
+(CString, CInt) are replicated among mobile devices and servers, and eventual consistency for these types is
+guaranteed when the clients are connected and if synchronization requests are made
+often. For each cloud type, entity or array, a fork-join automata for all
+supported operations is declared, which precisely specifies the merge policy for
+conflicting updates, with a last-write-wins policy. 
+%Note that compound cloud types, such as entities,
+%lists and sets can be defined , again with clean and intuitive consistency
+%semantics. Furthermore, the design of arrays (which are more like maps in
+%regular programming langauages) in the language makes assigning
+%unique keys to entities, and deleting entities less problematic in the presence
+%of concurrent operations (mention somewhere that these are designed after Chen's
+%relations). We will now explain cloud types, entities and arrays in detail through
+%the example in Fig.smth
+Other than guaranteeing eventual consistency,the language also provides strong consistency
+when needed, but using a compare and set-like construct for a basic cloud type.
+We can see that using cloud types, the semantics of eventual consistency and conflict
+resolution are hence tied to the data itself. \\
+\begin{figure}[tp]
+\begin{lstlisting}
+array Seat [row: int, letter: string] {
+  assignedTo: CString
+}
+function naiveReserve(seat: Seat, customer: string) {
+  if(seat.assignedTo.get() == "")
+    seat.assignedTo.set(customer)
+  else 
+    print("Reservation failed!")
+}
+function goodReserve( seat: Seat, customer: string) {
+  seat.assignedTo.setIfEmoty(customer)
+  flush
+  if(seat.assignedTo.get() != customer) print("Reservation Failed!")
+}
+\end{lstlisting}
+\caption{Cloud types compare-and-set for strong consistency}
+\label{lst:acCmpSet}
+\end{figure}
+
+
+We extend this language to support declaring consistency sets over cloud types.
+The design of our language is discussed in detail in Section 4.
+%Fig.(...) shows an example of a
+%program written using cloud types. Cloud types are included in a formally
+%described, Javascript-like language.
+%
+%(From here on, extreme spitting what is inside my mind)
+%In this language, data types are of two main categories, regular and cloud
+%types. Regular types can be used to pass parameters to functions, and as
+%indices. Their values are local and not replicated. Cloud types, on the other
+%hand Cannot be used as indices, escape manipulating functions or appear in
+%expressions. They can be thought of as terminals, where final results of
+%computations are written to, or initially read from, and nothing else can be done
+%to them. Cloud types come with well-defined behavior for merging updates
+%proposed by concurrent modifications, in terms of fork-join automata. Compound
+%cloud types, which are array and entities (inspired by relational Java) can be
+%expressed in terms of more primitive cloud types (e.g. CInt, CString...etc).
+%Once the operations
+%
+%talk about deletes, how array semantics solve certain problems...etc
+%
+%What is nice about cloud types is that operations are naturally separated into
+%the regular generation and manipulation operations, which are local, and to
+%operations that actually commit data and make it available for sharing and
+%further manipulation, the language also restricts the concept of deletion
+%
+%We modify and extend this language to support partial replicas on clients that
+%do not get updated in one atomic step, and managing replication among a cluster 
+%of servers. We build consistency sets on
+%top of the language. In the following chapter, we introduce our language through
+%examples, and show sample runs of allowed and disallowed operations
+%interleavings based on the consistency sets. In later chapters we describe the language in detail.
+
+
+
+
+
+
+
+
+
+%\begin{figure}[tp]
+%\begin{lstlisting}
+%class List {
+%  atomicset a;
+%  atomic(a) int size;
+%  atomic(a) Entry header |b = this.a|
+%  ....
+%}
+%\end{lstlisting}
+%\caption{Linked List example with addAll method}
+%\label{lst:acList}
+%\end{figure}
 
 
 

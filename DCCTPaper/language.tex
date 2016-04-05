@@ -1,94 +1,61 @@
 %! TEX root = main.tex
 
 
-\section{The  Language}
+\section{The  Language} 
 
-I need to describe it through my somewhat complicated example, then show the
-possible orderings of operations based on the consistency levels. I will also
-show legal and illegal consistency policy nestings. Show possible mistakes that
-can be made when there are no policies. This can happen when I describe the
-implementation of the framework. The latter examples, should
-be done maybe after explaining the theory on consistency level combinations.
-Other than that. 
+Our language is an extension to cloud types language, with the possibility of
+declaring consistency sets. We will introduce the language through an extended
+version of the example presented in the previous section. 
 
-\section{An Online Shopping Example}
-This example introduces a data schema that is denormalized. Denormalization is a
-common strategy in industry when designing distributed data storage. This is
-because joining data from different tables, located on diverse nodes is a costly
-operation, hence every column (I need to explain somewhere what a column means
-in general) is duplicated. In fact, even in traditional relational systems,
-views of tables were supported, which is somehow similar to denormalizing data
-for performance (refs). In our language, we support declaring views along with
-their relationships and consistency policy in relation to the original tables.
-
+%I need to describe it through my somewhat complicated example, then show the
+%possible orderings of operations based on the consistency levels. I will also
+%show legal and illegal consistency policy nestings. Show possible mistakes that
+%can be made when there are no policies. This can happen when I describe the
+%implementation of the framework. The latter examples, should
+%be done maybe after explaining the theory on consistency level combinations.
+%Other than that. 
+%
 \begin{figure}[tp]
 \begin{lstlisting}
-
 entity Customer {
    name: CString 
    country: Country
    paymentMethod: CString
    paymentInfo: CString
 }
-
-// must be serial or we cannot guarantee that the order will take 
-// the money from the correct payment method
-@ serial set (paymentInfo)
-
+@serial set (paymentInfo)
 entity CustomerSettings {
-this may read a "ramp" version of the address and the payment method,
-because it will be eventually consistent, we do not care
-// what is nice now is that we cannot read from this set by mistake to 
-the shipping queue!
+   paymentMethod: CString references Customer.paymentMethod
+   paymentInfo: CString references Customer.paymentInfo
 }
-
-// All readers observe the same version of payment method and info
-// no weird things can happen such as payment method with older payment info
-// things such as client still seeing old payment info can happen, but it is
-fine (for us)
-@snapshot set payment (Customer.paymentMethod, Customer.paymentInfo)
-
+@snapshot set payment (CustomerSettings.paymentMethod, CustomerSettings.paymentInfo)
 array Product[id: string] {
   name: CString
   price: CInt
-  // anonymous set
-  @serial set quantity: CInt // to guarantee that the stock appears at the
-  latest version everywhere.
+  @serial set quantity: CInt 
 }
-
-// arranged like this so orders are deleted when customers are, but actually I
-do not care about that.
-
 entity Order(customer: Customer) {
   time: CTime
 }
-
 array OrderItem[order: Order, product: Product] {
   quantity: CInt
   price: CInt
 }
-
 array CartItem[customer: Customer, product: Product] {
   quantity: CInt
 }
-
 entity OrderQueue {
   customer
   address // critical not to ship to an old address, hence serial, to force the
   latest version.
   amount
 }
-
-
-
 function addToCart(c: Customer, p: Product, q: int) {
   cartItem[c, p].quantity.add(q)
 }
-
 function deleteCustomer(c: Customer) {
   delete c
 }
-
 function submitOrder(customer: Customer) {
   var order = new Order(customer)
   order.time.set(now());
@@ -101,22 +68,79 @@ function submitOrder(customer: Customer) {
       cartitem.quantity.add(-oitem.quantity)
       product.quantity.add(-oitem.quantity))
   }
-
-function showOrders(customer: Customer) {
-  foreach order in all Order
-    where order.Customer == customer
-    orderby order.time {    
-    Print("Order of" + order.time)
-    
-    foreach(i in all OrderItem) where i.order == order {
-       Print(i.quantity + " " 
-            + i.product.name + "for" + i.price)
-    }
-  }
 }
 \end{lstlisting}
 \caption{Customer database example with atomic set declarations}
-\label{lst:ctStore}
+\end{figure}
+\label{lst:ctStoreSets}
 \
+%function showOrders(customer: Customer) {
+%  foreach order in all Order
+%    where order.Customer == customer
+%    orderby order.time {    
+%    Print("Order of" + order.time)
+%    
+%    foreach(i in all OrderItem) where i.order == order {
+%       Print(i.quantity + " " 
+%            + i.product.name + "for" + i.price)
+%    }
+%  }
+
+\section{An Online Shopping Example}
+A common design method for distributed data is to store data in a way that
+minimizes the number of nodes to be contacted in order to reply to a
+query. This often means denormalizing data. That is, columns may be replicated,
+and materialized views are common. Bearing that in mind, let's add paymentMethod and paymentInfo 
+properties to the Customer entity, and let's create a view, called
+CustomerSettings, contains only the payment information. (a bit made up, but
+representative enough for now). The fields of this entity are a view of the
+corresponding fields in the Customers, they need not be the most recent version
+of the original entity, however, they must be coherent. This is an example of 
+multi-part data. Hence, we declare the source of this data, and also put it in a
+set annotated with @snapshot. However, in the original table, these properties
+are annotated @serial, this is because we must ensure that the items a customer
+orders are paid or using the most recent payment method, however, for display,
+we do not care much, in the worst case, the client will try to re-enter the
+payment method (These are just example assumptions, the programmer is free to
+use whatever policies they want). Attribute quantity in Product array is
+annotated @serial, meaning all its replicas must be views consistently, and all
+updates to it are serialized. This is in order to avoid selling the same item to
+multiple clients, and to avoid distorting the stock value. All non annotated
+fields are eventually consistent. \\
+
+Let's examine the operations on our data definitions. addToCart is eventually
+consistent, with no ACI guarantees. We assume it is ok if the cart state is not
+consistent across all its replicas (e.g mobile and laptop of a customer), since
+the final checkout will happen at one machine. Deleting a customer or adding it,
+must be serial, since Customer entity contains a serial field. We explain the
+reasons in more detail in the following section, but in short, if this was not
+the case, the serializability of paymentInfo cannot be guaranteed. The most
+interesting operation is submitOrder, which touches data in different sets with
+different consistency policies. What should be the policy of the transaction
+itself? In fact, the concept of a transaction in our language differs from that
+in a regular DBMS. The only two restrictions we have on a transaction (a function
+here), is that they must maintain the consistency of all data sets they touch,
+and they signal success once the success of operations on all data sets is
+acknowledges, each according to its own consistency policy. This gives a lot of
+flexibility when committing or rolling back an operation. We guarantee that the
+touched item quantity will be observed serially, both when committed or rolled
+back, and we do not care for the rest. Note that the correctness of these
+assumptions depends on other transactions running concurrently. 
+
+The reader may have many questions by now. Is it possible to have transactions
+at different consistency levels touch the same data sets? Is it possible to read
+or write at consistency levels other than those declared? We answer all these
+questions in the next section, when we describe our system model.
+
+%This example introduces a data schema that is denormalized. Denormalization is a
+%common strategy in industry when designing distributed data storage. This is
+%because joining data from different tables, located on diverse nodes is a costly
+%operation, hence every column (I need to explain somewhere what a column means
+%in general) is duplicated. In fact, even in traditional relational systems,
+%views of tables were supported, which is somehow similar to denormalizing data
+%for performance (refs). In our language, we support declaring views along with
+%their relationships and consistency policy in relation to the original tables.
+
+
 
 
