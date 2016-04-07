@@ -90,7 +90,7 @@ possible? \\
 Let's think about consistency polices as means of preserving invariants through 
 limiting possible operation interleavings. Let's also claim that an invariant violation 
 is only detected by actually reading all data items affected by some update, this is 
-intuitive to see because, we can agree that updates in a linearisable transaction 
+intuitive to see because, we can agree that updates in a linearizable transaction 
 updating many items will not happen instantaneously to all the items, and this is 
 acceptable as long as observing all the items happens right after, or if writes that 
 are based on a subset of values written in such a transaction happen after all the

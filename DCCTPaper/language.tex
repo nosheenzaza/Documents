@@ -19,16 +19,17 @@ version of the example presented in the previous section.
 \begin{lstlisting}
 entity Customer {
    name: CString 
-   country: Country
+   country: CString
    paymentMethod: CString
    paymentInfo: CString
+   @serial address: {city: CString, street: CString}
 }
-@serial set (paymentInfo)
+@serial payment (Customer.paymentInfo, Customer.paymentMethod)
 entity CustomerSettings {
    paymentMethod: CString references Customer.paymentMethod
    paymentInfo: CString references Customer.paymentInfo
 }
-@snapshot set payment (CustomerSettings.paymentMethod, CustomerSettings.paymentInfo)
+@snapshot paymentView (CustomerSettings.paymentMethod, CustomerSettings.paymentInfo)
 array Product[id: string] {
   name: CString
   price: CInt
@@ -44,18 +45,10 @@ array OrderItem[order: Order, product: Product] {
 array CartItem[customer: Customer, product: Product] {
   quantity: CInt
 }
-entity OrderQueue {
-  customer
-  address // critical not to ship to an old address, hence serial, to force the
-  latest version.
-  amount
-}
 function addToCart(c: Customer, p: Product, q: int) {
   cartItem[c, p].quantity.add(q)
 }
-function deleteCustomer(c: Customer) {
-  delete c
-}
+
 function submitOrder(customer: Customer) {
   var order = new Order(customer)
   order.time.set(now());
