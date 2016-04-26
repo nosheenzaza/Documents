@@ -25,26 +25,32 @@ entity Customer {
    @serial address: {city: CString, street: CString}
 }
 @serial payment (Customer.paymentInfo, Customer.paymentMethod)
+
 entity CustomerSettings {
    paymentMethod: CString references Customer.paymentMethod
    paymentInfo: CString references Customer.paymentInfo
 }
 @snapshot paymentView (CustomerSettings.paymentMethod, CustomerSettings.paymentInfo)
+
 array Product[id: string] {
   name: CString
   price: CInt
   @serial set quantity: CInt 
 }
+
 entity Order(customer: Customer) {
   time: CTime
 }
+
 array OrderItem[order: Order, product: Product] {
   quantity: CInt
   price: CInt
 }
+
 array CartItem[customer: Customer, product: Product] {
   quantity: CInt
 }
+
 function addToCart(c: Customer, p: Product, q: int) {
   cartItem[c, p].quantity.add(q)
 }

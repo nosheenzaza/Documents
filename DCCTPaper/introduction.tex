@@ -3,6 +3,14 @@
 
 \section{Introduction}
 
+% I think I need to restructure as the following:
+% 1- I will introduce my own consistency level definitions, considering how they
+% affect data parts and replias. No need to mention bad sounding EC.
+% 2- I will remove bashing on consistency level definitions and everything not
+% to the point.
+% 3- I will include more language examples, and possible translations, assuming
+% that I am storing my data in different databases. 
+
 % Why replicate?
 In modern distributed systems, data is often replicated, either partially or totally 
 across several nodes. Replication primarily contributes to making distributed 
@@ -23,12 +31,12 @@ specific domain knowledge. \\  %elaborate later on, good discussion in MDCC pape
 
 % Do we always need strong consistency?
 For many systems, achieving this strong consistency level is unrealistic given
-the implied costs. Furthermore, it is possible to enforce many useful, common
-application correctness criteria without needing strict serializability. 
+the implied costs. This is why many data management systems do not enable strict
+serializability by default (refs). Furthermore, it is possible to enforce many useful, common
+application correctness criteria without needing strict serializability. This is
+true when it is not needed to observe the latest version of data, such as the
+following cases:
 % We can use eventual consistency for the following with the following benefits
-For instance, we can rely solely on eventual consistency, while still providing
-reasonable application behavior for the following use-cases:
-
 \begin{enumerate}
 % I think talking about all nodes is not correct here, and I did not mention
     % before the relations between number of nodes queried and consistency.
@@ -55,7 +63,8 @@ order to acknowledge the success of a read or write. \\
 %(write also cost in terms of message rounds). 
 
 % However, we cannot enforce all invariants with only eventual consistency
-On the other hand, there are use cases where nothing other than strong consistency can
+On the other hand, there are use cases where nothing other than strict
+serializability (even snapshot isolation will not do) can
 satisfy the correctness invariant. Such as:
 
 \begin{enumerate}
@@ -86,6 +95,16 @@ password with a reset token and using it only once.
 \item Maintaining foreign key constraints.
 \end{enumerate}
 
+%TODO rephrase and throw somewhere else.
+
+In essence, since most data abstractions are not atomic units, in the sense that they
+are composed of multiple parts that are replicated, and cannot be updated in the
+speed of light, the only way to make data seem consistency all the time is to
+delay subsequent interactions with data being manipulated, that is, limit
+concurrency with other operations. However, this is not always possible or even
+needed. Most data is not related in anyway and can be updated without
+coordination, and many readers can tolerate stale data. 
+
 % The problem is that using all these consistency levels in applications 
 % is not easy to express or reason about. 
 It is not hard to find many distributed applications that include use cases
@@ -101,45 +120,45 @@ transaction isolation levels(ref), to current distributed key-value stores.
 However, this support, in past and present, has suffered from many problems,
 which we go over in the following sections:
 
-\subsection{Philosophical Divide}
-In recent years, there has been debate on whether to use strong or weak consistency, 
-with researchers and practitioners generally favoring one over the other. This
-divide is clearly reflected in available frameworks. For instance, the first
-releases of Cassandra (since 2008), only supported eventual consistency and not
-concept of transactions, with programmers encouraged to use a relational
-database when needing strong consistency, or a service such as Zookeeper.
-Since 2013, there is very limited support for transactions. On the other hand,
-researchers generally aim to study making strong consistency feasible, with only
-little work on defining eventual consistency semantics (which does not come for
-free) (ref cloud types). Hence, developers requiring multiple
-consistency levels must use multiple tools to achieve this, which is cumbersome,
-and hard to debug and reason about. 
-
-\subsection{Poor Definitions of Consistency}
-The nature of data and operations
-greatly influences the complexity of the consistency policy definition. For
-instance, data can be either one atomic piece, such as data occupying a single
-memory location, in the sense that updating all bits in a memory location seems
-to happen at once, data that is not atomic is harder to reason about. Data can
-also be replicated. Data that is both non-atomic and replicated is even harder
-to reason about. Operations also can be atomic or multi-part (such as
-transactions and multi-statement functions). Yet, many theoretical definitions
-seem to ignore many of these aspects, and many practical definitions define
-either the correctness in terms of replication, or maintaining the coherence of
-multipart data. \\
-
-For instance, linearizability(ref) is concerned with ordering single
-operations over a single data item. While a useful and comprehensible theoretical
-definition, it applies only to a very narrow subset of real-world operation
-abstractions and data representations. It could, for instance be used to model adding
-two numbers that occupy only a single memory location (assuming accesses to
-memory locations are atomic). But it would fail to represent applying the ++
-operator in Java to longs (which occupy two memory locations), not to mention
-modeling transactions touching multiple data items, possibly partitioned over many
-machines and/or replicated. Strict serializability could be thought of as
-linearizability that covers grouped operations (transactions) and groups of
-items. However, it does not cover the semantics of replicated data items.\\
-
+%\subsection{Philosophical Divide}
+%In recent years, there has been debate on whether to use strong or weak consistency, 
+%with researchers and practitioners generally favoring one over the other. This
+%divide is clearly reflected in available frameworks. For instance, the first
+%releases of Cassandra (since 2008), only supported eventual consistency and not
+%concept of transactions, with programmers encouraged to use a relational
+%database when needing strong consistency, or a service such as Zookeeper.
+%Since 2013, there is very limited support for transactions. On the other hand,
+%researchers generally aim to study making strong consistency feasible, with only
+%little work on defining eventual consistency semantics (which does not come for
+%free) (ref cloud types). Hence, developers requiring multiple
+%consistency levels must use multiple tools to achieve this, which is cumbersome,
+%and hard to debug and reason about. 
+%
+%\subsection{Poor Definitions of Consistency}
+%The nature of data and operations
+%greatly influences the complexity of the consistency policy definition. For
+%instance, data can be either one atomic piece, such as data occupying a single
+%memory location, in the sense that updating all bits in a memory location seems
+%to happen at once, data that is not atomic is harder to reason about. Data can
+%also be replicated. Data that is both non-atomic and replicated is even harder
+%to reason about. Operations also can be atomic or multi-part (such as
+%transactions and multi-statement functions). Yet, many theoretical definitions
+%seem to ignore many of these aspects, and many practical definitions define
+%either the correctness in terms of replication, or maintaining the coherence of
+%multipart data. \\
+%
+%For instance, linearizability(ref) is concerned with ordering single
+%operations over a single data item. While a useful and comprehensible theoretical
+%definition, it applies only to a very narrow subset of real-world operation
+%abstractions and data representations. It could, for instance be used to model adding
+%two numbers that occupy only a single memory location (assuming accesses to
+%memory locations are atomic). But it would fail to represent applying the ++
+%operator in Java to longs (which occupy two memory locations), not to mention
+%modeling transactions touching multiple data items, possibly partitioned over many
+%machines and/or replicated. Strict serializability could be thought of as
+%linearizability that covers grouped operations (transactions) and groups of
+%items. However, it does not cover the semantics of replicated data items.\\
+%
 
 \subsection{Data Abstractions}
 As important it is to define which data structures represent a logical data
