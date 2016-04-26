@@ -74,10 +74,27 @@ exploiting consistency property definitions to enhance performance.
 distributed systems, domain-specific programming langauges
 
 \section{Introduction}
+multiple consistency levels in the same application are common, for example, in
+an online shopping web app, tracking stock, user name allocation require
+linearizability, logging user activity, recommending products, counting users
+interested in certain products are operatiosn without a determenitic outcome,
+and most systems can benefit from using only eventual consistency for such
+operations. The main aim providing two guarantees: one is to ensure proper protection of critical data, such
+as username and stock, but disallowing operations to run at a consistency level
+too weak to enforce uniqeness or usernames, or corrupting stock state. The other
+is to ensure that operations attempting to create logs, reccomendations lists
+and so on do not operate at a very strong level of consistency. This is done in
+our model by declaring the consistency properties operations must respect on
+data, and deriving allowed operation consistency from these declarations. This
+way, the range of isolation levels chosen by a programmer is restricted, and
+automatic assignments of default consistency levels on operations can be
+performed. Static analysis is performed on data and operations, so all
+consistency properties become known, which can be exploited at runtime.
 
 The text of the paper begins here.
 
 \section{System Model}
+\section{Example Language}
 \appendix
 \section{Appendix Title}
 
