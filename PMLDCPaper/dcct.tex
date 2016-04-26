@@ -1,0 +1,105 @@
+\documentclass[preprint]{sigplanconf}
+
+% The following \documentclass options may be useful:
+
+% preprint      Remove this option only once the paper is in final form.
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% numbers       To obtain numeric citation style instead of author/year.
+
+\usepackage{amsmath}
+
+\newcommand{\cL}{{\cal L}}
+
+\begin{document}
+
+\special{papersize=8.5in,11in}
+\setlength{\pdfpageheight}{\paperheight}
+\setlength{\pdfpagewidth}{\paperwidth}
+
+\conferenceinfo{CONF 'yy}{Month d--d, 20yy, City, ST, Country}
+\copyrightyear{20yy}
+\copyrightdata{978-1-nnnn-nnnn-n/yy/mm}
+\copyrightdoi{nnnnnnn.nnnnnnn}
+
+% Uncomment the publication rights you want to use.
+%\publicationrights{transferred}
+%\publicationrights{licensed}     % this is the default
+%\publicationrights{author-pays}
+
+%\titlebanner{banner above paper title}        % These are ignored unless
+\preprintfooter{Ensuring concurrent operations on critical data preserve its
+  invariants and expected semantics for all concurrent clients}   % 'preprint' option specified.
+
+\title{Data-centric Consistency Policies}
+\subtitle{A new theory and programming model for developing
+  distributed applications}
+
+\authorinfo{Nosheen Zaza}
+           {Università della Svizzera italiana (USI)}
+           {zazan@usi.ch}
+\authorinfo{Nate Nystrom}
+           {Università della Svizzera italiana (USI)}
+           {nystrom@usi.ch}
+
+\maketitle
+
+\begin{abstract}
+The consistency level enforced by operations on replicated, distributed data is 
+an important parameter in distributed applications, as it impacts correctness, 
+performance and availability. Nowadays, it is very common to find various consistency
+levels used in a single application, however, current frameworks do not facilitate
+working with and reasoning about different consistency properties of an application. 
+Furthermore, the problem of defining the semantics of operations enforcing different 
+consistency levels has not been well defined or studied. We propose a new
+approach for specifying consistency properties based on an important observation: 
+correctness criteria and invariants are a property of data, not operations, hence it is 
+reasonable to enable defining the consistency properties required to enforce them on data 
+rather than operations. We have defined a theoretical model for data-centric reasoning about consistency
+properties, and designed a domain-specific programming language we call Data Centric Cloud Types, that enables 
+declaring consistency properties, along with a type system to check the compatibility of declared consistency 
+properties. The benefits of this language are programs with clearer consistency properties which are 
+easier to define and reason about, and the possibility of optimising runtime and commit protocols to enable 
+exploiting consistency property definitions to enhance performance.
+\end{abstract}
+
+\category{CR-number}{subcategory}{third-level}
+
+% general terms are not compulsory anymore,
+% you may leave them out
+%\terms
+%term1, term2
+
+\keywords
+distributed systems, domain-specific programming langauges
+
+\section{Introduction}
+
+The text of the paper begins here.
+
+\section{System Model}
+\appendix
+\section{Appendix Title}
+
+This is the text of the appendix, if you need one.
+
+\acks
+
+Acknowledgments, if needed.
+
+% We recommend abbrvnat bibliography style.
+
+\bibliographystyle{abbrvnat}
+
+% The bibliography should be embedded for final submission.
+
+\begin{thebibliography}{}
+\softraggedright
+
+\bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
+P. Q. Smith, and X. Y. Jones. ...reference text...
+
+\end{thebibliography}
+
+
+\end{document}
