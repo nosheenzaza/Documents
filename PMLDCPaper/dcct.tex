@@ -82,7 +82,7 @@ and most systems can benefit from using only eventual consistency for such
 operations. The main aim providing two guarantees: one is to ensure proper protection of critical data, such
 as username and stock, but disallowing operations to run at a consistency level
 too weak to enforce uniqeness or usernames, or corrupting stock state. The other
-is to ensure that operations attempting to create logs, reccomendations lists
+is to ensure that operations attempting to create logs, recommendations lists
 and so on do not operate at a very strong level of consistency. This is done in
 our model by declaring the consistency properties operations must respect on
 data, and deriving allowed operation consistency from these declarations. This
@@ -91,9 +91,130 @@ automatic assignments of default consistency levels on operations can be
 performed. Static analysis is performed on data and operations, so all
 consistency properties become known, which can be exploited at runtime.
 
-The text of the paper begins here.
+The contributions we make are the following 
+\begin{itemize}
+  \item A model for describing data regions annotated with consistency
+    properties, as well logical operational units interacting with these
+    regions.
+  \item A domain specific programming language supporting 3 useful consistency
+    properties. The progarmmer declares the distributed data schema with
+    consistency operations, as well as distributed actions on the schema. The
+    type system infers default consistency levels for different parts of these
+    actions, and detects invalid consistency annotations on these actions. 
+\end{itemize}
+
+It is the interaction of reads and writes on conflicting objects that creates
+problems, so, we specify on these objects the consistency properties.
+
+A hard question for me is always, is this a read policy or a write policy?
+We have a different answer to that, we have the notion of max. coherence.
+Than what about consistency, as in, integrity?
 
 \section{System Model}
+I introduce the general model, it is similar to the Quelea(ref) model but extended
+with versions on replicas, and considers only reads and writes, not individual
+operations, in addition to sequences of reads/writes (actions), this allows us
+to describe serializability, as well as other models that require coordination
+between replicas and awareness of variable versions.
+
+The model separates two concerns, how the data will be observed (consistency)
+from how this consistency is provided. in replicated datatypes, we are concerned
+with the second, so it could be considered an optimization. Our model does not
+describe merge policies and leaves it as a separate concern.
+
+Hence, in the system, we specify the strongest guarantee a data regions gives
+us, in terms of observable combinations of versions, which can be thought as a
+finer-grained versions of what a whole store provides. This makes reasoning about data much simpler.
+I could motivate this as a mini-version of knowing the semantics of your store,
+like really the precise semantics! This affects how you issue your reads and
+writes and stuff, from where you can read where you can write, additional
+operations you need to do to get out more, we do all this for the granularity
+the programmer chooses! No more confusing read or write interactions, and
+everything is tracked for safety and ease of debugging (ease of debugging is
+something I did not think about before), it also gives us a better way to
+optimize runtime and so. Hence, we care about the resulting data, not the
+operations that resulting in data with certain properties.
+
+
+version id 
+action id.
+session id.
+version count (replication factor).
+data source, same object (for write after read), or external.
+
+each data region can contain one or more items, regions are disjoint, we
+describe in the region the highest visibility guarantee that the region can
+provide, in terms of region coherence. Concretely, in order of enforcement cost
+(allowed concurrency, that is, possible concurrent operation permutations)
+
+any: any data we can get, but it cannot come out of thin air
+diagnosis: if we issue two reads A and B where B happens after A, possible to observe at B a value written
+before A, different parts at different versions possible. (I started to mix in operation properties, not good!)
+write behavior: we can read any version form the set or external source, and
+write to the set.
+%local 
+%local_latest let me ignore local semantics for now.
+coherent: at the same revision, however we could go back in time.
+diagnosis, we could observe older versions, however for all items in the set,
+they are at the same revision
+
+monotonic-noncoherent: for individual items, either same version observed before
+or newer, however, no coherence. 
+monotonic-coherent: same as above with coherence.
+latest: always latest version written of data.
+
+My model does not support causality, because there is no distinction based on
+individual operations, however, this must be handled when defining actions (need
+to think about that). Actually for causality, I have never seem someone who
+pulls comments then posts then decides to display comments unrelated to a post!
+the solution would be merging the set model with suitabe client-side constructs
+for handling proper output of fetched data, consider the actor model combined
+with futures for instance. We will show how to merge sets with client-side
+constructs for very controllable consistency control.
+(Coming to think about it, even ramp property is some form of causal
+consistency!) 
+company like a good example
+deletion of information currently viewed a good example of cases not even cared
+about
+
+What the store really sees and maps to is too low-level (dog slide from bailis
+work), what is the point of very intricate definitions then? This is why my
+policies are specified in terms of reads and writes.
+
+now it is the job of the programmer to specify related regions and annotate them
+with consistency level, however, what guarantees do we have for operations? how
+are they assigned different isolation levels?
+further more, how can we ensure integrity of data according to the sequential
+spec?
+
+asnwer is, we give pragmatic operations, manifesting the fact that operations
+fail, happen out of order and may (again starting to overcomplicate things )
+note thta performance and consistency are differnet issues, we give programmers
+two modes of sequencing operation within actions. the action itself can be
+interleaved. 
+
+
+We model RDTs in a way similar to Burckhardt's(ref)
+We assume separate conflict resolution mechanism for operations.
+
+\section{Language implementation}
+3 isolation levels for actions Srtict serializability, Atomic visibility and
+Eventual consistency with LWW. 
+2 kinds of data types, local and cloud.
+each client forks a local revision derived from a node it is connected to.
+the revision is partial, revision contents depend on data set declarations.
+an isolation level on a data set specified when concurrent observers (other actions)
+can observe data, and where they can write it.
+serial, means no concurrent actions that contain a write.
+snapshot, means no concurrent actions until all.
+ec, means concurrent reads and writes are possible at anytime.
+
+all operations in a session are async (similar to actor model), unless otherwise
+specified by the programmer.
+
+all operations in separate sessions are async, unless otherwise specified by the
+policy of touched data.
+
 \section{Example Language}
 \appendix
 \section{Appendix Title}
