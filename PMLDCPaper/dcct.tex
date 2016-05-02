@@ -88,113 +88,115 @@ exploiting consistency property definitions to enhance performance.
 %term1, term2
 
 \keywords
-distributed systems, domain-specific programming langauges
+distributed systems, domain-specific programming languages.
 
 \section{Introduction}
-Nowadays, it is common to find multiple consistency levels in one application. For instance, in an online 
-shopping web app, tracking and updating stock, and allocating unique user names requires linearizability, 
-while logging user activity, showing recommending products, counting users
-interested in certain products, and similar operations without a deterministic outcome,
-can benefit from weaker consistency models. Many systems support multiple
-consistency policies(refs), and allow arbitrary interactions and nestings among
-operations enforcing different consistency levels. However, this can be
-dangerous. For instance, in a relational database (example of x + y = 3). The
-isolation theorem describes correctness criteria for mixing operations. 
+In modern distributed systems, data is often replicated 
+across several nodes. Replication primarily contributes to making distributed 
+applications more resilient to failure, and allowing the placement of data closer to clients, 
+thus reducing communication delays especially for geo-distributed applications. 
+However, managing the consistency of replicated data is a well-known, nontrivial
+problem. Ideally, all clients must observe the most recent, correct (according to
+application specification) data at all time for the entire store. Achieving this
+consistency level through linearizability or strict serializability entails well
+documented costs in terms of latency, availability and partition
+tolerance. For this reason, many weaker consistency levels have been proposed,
+such as eventual consistency, causal consistency, atomic visibility and others. 
 
+Many storage systems allow programmers to specify a consistency level per
+operation, or per sequence of operations that represent a logical unit of work.
+However, mapping high application-level consistency requirements to  a combination of
+low-level consistency settings on operations is a tedious task. (examples,
+cassandra combinations, anomalies when mixing sql consistency levels).
 
-The main aim providing two guarantees: one is to ensure proper protection of critical data, such
-as username and stock, but disallowing operations to run at a consistency level
-too weak to enforce uniqeness or usernames, or corrupting stock state. The other
-is to ensure that operations attempting to create logs, recommendations lists
-and so on do not operate at a very strong level of consistency. This is done in
-our model by declaring the consistency properties operations must respect on
-data, and deriving allowed operation consistency from these declarations. This
-way, the range of isolation levels chosen by a programmer is restricted, and
-automatic assignments of default consistency levels on operations can be
-performed. Static analysis is performed on data and operations, so all
-consistency properties become known, which can be exploited at runtime.
-
-
-
+To deal with this problem, we propose a high level, data-centric model that allows developers to declaratively state
+consistency requirements for different parts of an application. Our approach is
+based on  the following observation: consistency levels are described in terms
+of ordering restrictions of concurrent operations touching a common set of objects, for which
+a certain invariant must hold. Since the invariants are related to the objects
+themselves, it makes sense to enable programmers to declare the consistency
+requirements itself on those common objects. As a simple example (counter
+example and serializability).
 The contributions we make are the following 
 \begin{itemize}
   \item A model for describing data regions annotated with consistency
-    properties, as well logical operational units interacting with these
-    regions.
+    properties, and assigning suitable isolation levels for individual
+    operations, as well as sequences of operations interacting with these
+    regions, such that these consistency properties are maintained.
+   
   \item A domain specific programming language supporting 3 useful consistency
-    properties. The progarmmer declares the distributed data schema with
-    consistency operations, as well as distributed actions on the schema. The
-    type system infers default consistency levels for different parts of these
-    actions, and detects invalid consistency annotations on these actions. 
+    properties: eventual consistency, monotonic atomic view, and serializability.
 \end{itemize}
 
-It is the interaction of reads and writes on conflicting objects that creates
-problems, so, we specify on these objects the consistency properties.
-
-For instance, we cannot get a counter that is consistent without serializing
-writes, if writes are not guaranteed to acquire a lock, there is no way to
-guarantee a consistent read of the counter.
-
-Similarly, in cassandra, it is no way guarantee consistent reads without writing
-to more than one node
-
-hence we can see how certain way of writing to a set defines the maximum
-possible consistency for subsequent reads. 
-
-Hence we annotate the sets with the desired consistency policies, to make it
-clear how operations must write, and for write-after-read situation, we track
-transactions that attempt to write based on a read, and restrict that.
-
-this allows us to assign isolation levels automatically, as well as enforce
-useful correctness criteria.
-
-also we notice in many systems, restrictions
-
-this way we avoid over tracking ops for causal consistency, and we do not assume
-that lower level transactiosn know what they are doing.
-
-I need to find a way to unify transactions with operations.
-
-A hard question for me is always, is this a read policy or a write policy?
-We have a different answer to that, we have the notion of max. coherence.
-Than what about consistency, as in, integrity?
-
 \section{System Model}
-I introduce the general model, it is similar to the Quelea(ref) model but extended
-with versions on replicas, and considers only reads and writes, not individual
-operations, in addition to sequences of reads/writes (actions), this allows us
-to describe serializability, as well as other models that require coordination
-between replicas and awareness of variable versions.
 
-The model separates two concerns, how the data will be observed (consistency)
-from how this consistency is provided. in replicated datatypes, we are concerned
-with the second, so it could be considered an optimization. Our model does not
-describe merge policies and leaves it as a separate concern.
+Our system model splits the domain of stored objects into a collection of named,
+disjoint regions Set s = \{x, y, z..\}. Each
+region contains objects that share a correctness invariant. 
+Each object has the following attribute vector (version, replica\_id, action\_id) attached,  where
+version is an integer that starts at 0 for all store objects at the start of a
+program, and is incremented after each write (including a merge of incoming
+versions from other replicas), version -1 means that the object is deleted.
+replica\_id is an integer identifier of the replica storing the object. and
+action\_id is the action that wrote this version of the object. An action is
+assigned to read/write operations that perform a single logical task. Either all
+operations of an action succeed or all fail and the action is rolled back,
+hence. The minimum guarantee for actions is atomicity within the boundaries of
+each touched set. We will see through example later why this is a useful, more
+premissive property that total atomicity.
 
-Hence, in the system, we specify the strongest guarantee a data regions gives
-us, in terms of observable combinations of versions, which can be thought as a
-finer-grained versions of what a whole store provides. This makes reasoning about data much simpler.
-I could motivate this as a mini-version of knowing the semantics of your store,/
-like really the precise semantics! This affects how you issue your reads and
-writes and stuff, from where you can read where you can write, additional
-operations you need to do to get out more, we do all this for the granularity
-the programmer chooses! No more confusing read or write interactions, and
-everything is tracked for safety and ease of debugging (ease of debugging is
-something I did not think about before), it also gives us a better way to
-optimize runtime and so. Hence, we care about the resulting data, not the
-operations that resulting in data with certain properties.
+In our model, we reason about read/write operation. Each operation has the
+attribute vector (replica\_id, action\_id) which are the same as those for the
+data.
 
+Now, we define a consistency policy of a region. A consistency policy defines 1)
+the conditions under which versions in a set are made visible for subsequent
+reads/writes, and 2) version transitions allowed by writes to a set. attribute
+vectors for objects and actions, as well as set boundaries parameterize
+consistency policies. Below we show some consistency properties defined
+in terms of our region and operation patameters:
 
-version id 
-action id.
-session id.
-version count (replication factor).
-data source, same object (for write after read), or external.
+\begin{itemize}
+  \item any: it is possible for any write operation to write any data.
+  \item monotonic-noncoherent: any write must be to a newer version, however,
+    there is no restriction among elements in the set.
+  \item coherent-nonmonotonic: all objects in a set are at the same version.
+    however, it is not required for the steo to be monotonic.
+  \item coherent-monotonic: all objects are at the same version, writes must
+    transform all items to a more recent version.
+  \item latest: all objects are at the most recent revision.
+  \item how to represent causal restrictions? 
+\end{itemize}
 
-each data region can contain one or more items, regions are disjoint, we
-describe in the region the highest visibility guarantee that the region can
-provide, in terms of region coherence. Concretely, in order of enforcement cost
-(allowed concurrency, that is, possible concurrent operation permutations)
+As for reads in our model, the result of a read is considered to be stored in a
+local region, for which the version, action and consistency of source set are
+tracked. Any reads from this set generate a similar set. In our system, we track
+the flow of data among regions, and do not allow data.
+
+%Hence, in the system, we specify the strongest guarantee a data regions gives
+%us, in terms of observable combinations of versions, which can be thought as a
+%finer-grained versions of what a whole store provides. This makes reasoning about data much simpler.
+%I could motivate this as a mini-version of knowing the semantics of your store,/
+%like really the precise semantics! This affects how you issue your reads and
+%writes and stuff, from where you can read where you can write, additional
+%operations you need to do to get out more, we do all this for the granularity
+%the programmer chooses! No more confusing read or write interactions, and
+%everything is tracked for safety and ease of debugging (ease of debugging is
+%something I did not think about before), it also gives us a better way to
+%optimize runtime and so. Hence, we care about the resulting data, not the
+%operations that resulting in data with certain properties.
+%
+
+%version id 
+%action id.
+%session id.
+%version count (replication factor).
+%data source, same object (for write after read), or external.
+
+%each data region can contain one or more items, regions are disjoint, we
+%describe in the region the highest visibility guarantee that the region can
+%provide, in terms of region coherence. Concretely, in order of enforcement cost
+%(allowed concurrency, that is, possible concurrent operation permutations)
 
 any: any data we can get, but it cannot come out of thin air
 diagnosis: if we issue two reads A and B where B happens after A, possible to observe at B a value written
@@ -212,40 +214,40 @@ or newer, however, no coherence.
 monotonic-coherent: same as above with coherence.
 latest: always latest version written of data.
 
-My model does not support causality, because there is no distinction based on
-individual operations, however, this must be handled when defining actions (need
-to think about that). Actually for causality, I have never seem someone who
-pulls comments then posts then decides to display comments unrelated to a post!
-the solution would be merging the set model with suitabe client-side constructs
-for handling proper output of fetched data, consider the actor model combined
-with futures for instance. We will show how to merge sets with client-side
-constructs for very controllable consistency control.
-(Coming to think about it, even ramp property is some form of causal
-consistency!) 
-company like a good example
-deletion of information currently viewed a good example of cases not even cared
-about
-
-What the store really sees and maps to is too low-level (dog slide from bailis
-work), what is the point of very intricate definitions then? This is why my
-policies are specified in terms of reads and writes.
-
-now it is the job of the programmer to specify related regions and annotate them
-with consistency level, however, what guarantees do we have for operations? how
-are they assigned different isolation levels?
-further more, how can we ensure integrity of data according to the sequential
-spec?
-
-asnwer is, we give pragmatic operations, manifesting the fact that operations
-fail, happen out of order and may (again starting to overcomplicate things )
-note thta performance and consistency are differnet issues, we give programmers
-two modes of sequencing operation within actions. the action itself can be
-interleaved. 
-
-We argue that assigning policies to sets does not degrade expressivenes too
-much, many consistency properties can be expressed in our model, I need to list
-what can and cannot be described, I can use the taxonomy of HAT for that
-purpose.
+%My model does not support causality, because there is no distinction based on
+%individual operations, however, this must be handled when defining actions (need
+%to think about that). Actually for causality, I have never seem someone who
+%pulls comments then posts then decides to display comments unrelated to a post!
+%the solution would be merging the set model with suitabe client-side constructs
+%for handling proper output of fetched data, consider the actor model combined
+%with futures for instance. We will show how to merge sets with client-side
+%constructs for very controllable consistency control.
+%(Coming to think about it, even ramp property is some form of causal
+%consistency!) 
+%company like a good example
+%deletion of information currently viewed a good example of cases not even cared
+%about
+%
+%What the store really sees and maps to is too low-level (dog slide from bailis
+%work), what is the point of very intricate definitions then? This is why my
+%policies are specified in terms of reads and writes.
+%
+%now it is the job of the programmer to specify related regions and annotate them
+%with consistency level, however, what guarantees do we have for operations? how
+%are they assigned different isolation levels?
+%further more, how can we ensure integrity of data according to the sequential
+%spec?
+%
+%asnwer is, we give pragmatic operations, manifesting the fact that operations
+%fail, happen out of order and may (again starting to overcomplicate things )
+%note thta performance and consistency are differnet issues, we give programmers
+%two modes of sequencing operation within actions. the action itself can be
+%interleaved. 
+%
+%We argue that assigning policies to sets does not degrade expressivenes too
+%much, many consistency properties can be expressed in our model, I need to list
+%what can and cannot be described, I can use the taxonomy of HAT for that
+%purpose.
 
 in a way, assigning consistency poicies to transaction gives a certain guarantee
 for the duration of the transaction, about data observed in the transaction,
