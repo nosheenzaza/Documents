@@ -1,4 +1,4 @@
-\documentclass[preprint]{sigplanconf}
+\documentclass[preprint, numbers]{sigplanconf}
 
 % The following \documentclass options may be useful:
 
@@ -10,6 +10,23 @@
 \usepackage{amsmath}
 
 \newcommand{\cL}{{\cal L}}
+
+%TODO
+% 1) find a way to handle nestings, check the work of atomic sets and loci again
+% this was my problem because of assuming that nested levels of consistency in
+% an operation results imply the same things when talking about nested data
+% regions.
+% 2) define all version combinations for a number of cosistency policies, make
+% it clear what can and cannot be supported.
+% so in theory everything can be defined in terms of current versions, and how
+% next versions relate to each other in a set. 
+% 3) find a way to combine this with the mixing theorem of Adya, 
+% I state that my system does not assume transactions know what they are doing,
+% and also makes it clear that we need to write at minimum isolation level
+% declared on a set.
+% TODO what is the state in database systems for atomicity of individual sql
+% statements? Can we guarantee isolation level 3 if sql statements are not
+% atomic?
 
 \begin{document}
 
@@ -74,12 +91,18 @@ exploiting consistency property definitions to enhance performance.
 distributed systems, domain-specific programming langauges
 
 \section{Introduction}
-multiple consistency levels in the same application are common, for example, in
-an online shopping web app, tracking stock, user name allocation require
-linearizability, logging user activity, recommending products, counting users
-interested in certain products are operatiosn without a determenitic outcome,
-and most systems can benefit from using only eventual consistency for such
-operations. The main aim providing two guarantees: one is to ensure proper protection of critical data, such
+Nowadays, it is common to find multiple consistency levels in one application. For instance, in an online 
+shopping web app, tracking and updating stock, and allocating unique user names requires linearizability, 
+while logging user activity, showing recommending products, counting users
+interested in certain products, and similar operations without a deterministic outcome,
+can benefit from weaker consistency models. Many systems support multiple
+consistency policies(refs), and allow arbitrary interactions and nestings among
+operations enforcing different consistency levels. However, this can be
+dangerous. For instance, in a relational database (example of x + y = 3). The
+isolation theorem describes correctness criteria for mixing operations. 
+
+
+The main aim providing two guarantees: one is to ensure proper protection of critical data, such
 as username and stock, but disallowing operations to run at a consistency level
 too weak to enforce uniqeness or usernames, or corrupting stock state. The other
 is to ensure that operations attempting to create logs, recommendations lists
@@ -90,6 +113,8 @@ way, the range of isolation levels chosen by a programmer is restricted, and
 automatic assignments of default consistency levels on operations can be
 performed. Static analysis is performed on data and operations, so all
 consistency properties become known, which can be exploited at runtime.
+
+
 
 The contributions we make are the following 
 \begin{itemize}
@@ -105,6 +130,30 @@ The contributions we make are the following
 
 It is the interaction of reads and writes on conflicting objects that creates
 problems, so, we specify on these objects the consistency properties.
+
+For instance, we cannot get a counter that is consistent without serializing
+writes, if writes are not guaranteed to acquire a lock, there is no way to
+guarantee a consistent read of the counter.
+
+Similarly, in cassandra, it is no way guarantee consistent reads without writing
+to more than one node
+
+hence we can see how certain way of writing to a set defines the maximum
+possible consistency for subsequent reads. 
+
+Hence we annotate the sets with the desired consistency policies, to make it
+clear how operations must write, and for write-after-read situation, we track
+transactions that attempt to write based on a read, and restrict that.
+
+this allows us to assign isolation levels automatically, as well as enforce
+useful correctness criteria.
+
+also we notice in many systems, restrictions
+
+this way we avoid over tracking ops for causal consistency, and we do not assume
+that lower level transactiosn know what they are doing.
+
+I need to find a way to unify transactions with operations.
 
 A hard question for me is always, is this a read policy or a write policy?
 We have a different answer to that, we have the notion of max. coherence.
@@ -125,7 +174,7 @@ describe merge policies and leaves it as a separate concern.
 Hence, in the system, we specify the strongest guarantee a data regions gives
 us, in terms of observable combinations of versions, which can be thought as a
 finer-grained versions of what a whole store provides. This makes reasoning about data much simpler.
-I could motivate this as a mini-version of knowing the semantics of your store,
+I could motivate this as a mini-version of knowing the semantics of your store,/
 like really the precise semantics! This affects how you issue your reads and
 writes and stuff, from where you can read where you can write, additional
 operations you need to do to get out more, we do all this for the granularity
@@ -193,6 +242,20 @@ note thta performance and consistency are differnet issues, we give programmers
 two modes of sequencing operation within actions. the action itself can be
 interleaved. 
 
+We argue that assigning policies to sets does not degrade expressivenes too
+much, many consistency properties can be expressed in our model, I need to list
+what can and cannot be described, I can use the taxonomy of HAT for that
+purpose.
+
+in a way, assigning consistency poicies to transaction gives a certain guarantee
+for the duration of the transaction, about data observed in the transaction,
+however, we argue that this is not enough when arguing about a system as a
+whole, with possibly future operations to be added.
+
+I am thinking that, predicate problems are an instance of a problem with a
+larger set requiring certain consistency (the set of all rows of a type),
+containing a smaller set with other consistency requirements, however,
+predicates contain dynamic data, so the set is also dynamic.
 
 We model RDTs in a way similar to Burckhardt's(ref)
 We assume separate conflict resolution mechanism for operations.
