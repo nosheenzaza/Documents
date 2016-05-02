@@ -201,21 +201,21 @@ source\_consistency) Any reads from local sets generate a similar set.
 %provide, in terms of region coherence. Concretely, in order of enforcement cost
 %(allowed concurrency, that is, possible concurrent operation permutations)
 
-any: any data we can get, but it cannot come out of thin air
-diagnosis: if we issue two reads A and B where B happens after A, possible to observe at B a value written
-before A, different parts at different versions possible. (I started to mix in operation properties, not good!)
-write behavior: we can read any version form the set or external source, and
-write to the set.
-%local 
-%local_latest let me ignore local semantics for now.
-coherent: at the same revision, however we could go back in time.
-diagnosis, we could observe older versions, however for all items in the set,
-they are at the same revision
-
-monotonic-noncoherent: for individual items, either same version observed before
-or newer, however, no coherence. 
-monotonic-coherent: same as above with coherence.
-latest: always latest version written of data.
+%any: any data we can get, but it cannot come out of thin air
+%diagnosis: if we issue two reads A and B where B happens after A, possible to observe at B a value written
+%before A, different parts at different versions possible. (I started to mix in operation properties, not good!)
+%write behavior: we can read any version form the set or external source, and
+%write to the set.
+%%local 
+%%local_latest let me ignore local semantics for now.
+%coherent: at the same revision, however we could go back in time.
+%diagnosis, we could observe older versions, however for all items in the set,
+%they are at the same revision
+%
+%monotonic-noncoherent: for individual items, either same version observed before
+%or newer, however, no coherence. 
+%monotonic-coherent: same as above with coherence.
+%latest: always latest version written of data.
 
 %My model does not support causality, because there is no distinction based on
 %individual operations, however, this must be handled when defining actions (need
@@ -252,37 +252,38 @@ latest: always latest version written of data.
 %what can and cannot be described, I can use the taxonomy of HAT for that
 %purpose.
 
-in a way, assigning consistency poicies to transaction gives a certain guarantee
-for the duration of the transaction, about data observed in the transaction,
-however, we argue that this is not enough when arguing about a system as a
-whole, with possibly future operations to be added.
-
-I am thinking that, predicate problems are an instance of a problem with a
-larger set requiring certain consistency (the set of all rows of a type),
-containing a smaller set with other consistency requirements, however,
-predicates contain dynamic data, so the set is also dynamic.
-
-We model RDTs in a way similar to Burckhardt's(ref)
-We assume separate conflict resolution mechanism for operations.
+%in a way, assigning consistency poicies to transaction gives a certain guarantee
+%for the duration of the transaction, about data observed in the transaction,
+%however, we argue that this is not enough when arguing about a system as a
+%whole, with possibly future operations to be added.
+%
+%I am thinking that, predicate problems are an instance of a problem with a
+%larger set requiring certain consistency (the set of all rows of a type),
+%containing a smaller set with other consistency requirements, however,
+%predicates contain dynamic data, so the set is also dynamic.
+%
+%We model RDTs in a way similar to Burckhardt's(ref)
+%We assume separate conflict resolution mechanism for operations.
 
 \section{Language implementation}
 3 isolation levels for actions Srtict serializability, Atomic visibility and
-Eventual consistency with LWW. 
-2 kinds of data types, local and cloud.
-each client forks a local revision derived from a node it is connected to.
-the revision is partial, revision contents depend on data set declarations.
-an isolation level on a data set specified when concurrent observers (other actions)
-can observe data, and where they can write it.
-serial, means no concurrent actions that contain a write.
-snapshot, means no concurrent actions until all.
-ec, means concurrent reads and writes are possible at anytime.
+Eventual consistency by using eventually consistent RDTs. 
 
-all operations in a session are async (similar to actor model), unless otherwise
-specified by the programmer.
-
-all operations in separate sessions are async, unless otherwise specified by the
-policy of touched data.
-
+%2 kinds of data types, local and cloud.
+%each client forks a local revision derived from a node it is connected to.
+%the revision is partial, revision contents depend on data set declarations.
+%an isolation level on a data set specified when concurrent observers (other actions)
+%can observe data, and where they can write it.
+%serial, means no concurrent actions that contain a write.
+%snapshot, means no concurrent actions until all.
+%ec, means concurrent reads and writes are possible at anytime.
+%
+%all operations in a session are async (similar to actor model), unless otherwise
+%specified by the programmer.
+%
+%all operations in separate sessions are async, unless otherwise specified by the
+%policy of touched data.
+%
 \section{Example Language}
 \appendix
 \section{Appendix Title}
