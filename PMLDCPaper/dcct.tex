@@ -27,6 +27,9 @@
 % TODO what is the state in database systems for atomicity of individual sql
 % statements? Can we guarantee isolation level 3 if sql statements are not
 % atomic?
+% TODO shorten abstract, Nate says too wordy.
+% TODO future work: nesting and intersection of consistent regions.
+% TODO think whether or not to include causal consistency.
 
 \begin{document}
 
@@ -96,7 +99,7 @@ thus reducing communication delays especially for geo-distributed applications.
 However, managing the consistency of replicated data is a well-known, nontrivial
 problem. Ideally, all clients must observe the most recent, correct (according to
 application specification) data at all time for the entire store. Achieving this
-consistency level through linearizability or strict serializability entails well
+consistency level through linearizability or serializability entails well
 documented costs in terms of latency, availability and partition
 tolerance. For this reason, many weaker consistency levels have been proposed,
 such as eventual consistency, causal consistency, atomic visibility and others. 
@@ -127,6 +130,61 @@ The contributions we make are the following
 \end{itemize}
 
 \section{System Model}
+(ANOTHER STORY)
+serial came from serial source
+causal from causal, all items causally related
+eventual from eventual source.
+
+we flip the reasoning, annotating different schema parts with guarantees needed
+for the store.
+
+all operations must execute at isolation levels compatible with the store, what
+is interesting is that we define actions on data from multiple sets, and then
+different parts of the action are assigned suitable isolation levels, and
+executed against suitable store.
+
+hence, our model allows seamless operations on different stores, and the type
+system ensures that program actions respect the consistencies, by disallowing
+operatiosn 
+
+
+(using the above story, I can get rid of the damn causality in terms of version
+problem.)
+
+I need to solve nesting of regions problem
+
+weaker containing stronger = ok
+stronger containing weaker = not ok
+
+
+I need to solve temporary merging of sets problem, and then guarantees for other
+other operatiosn operating on the same isolation level.
+same as above, + any merge on action level is treated as a permanent merge, for
+safety
+too restrictive, but what to do?
+
+I need to specify the interface a store needs to support to be a suitable
+backend for our system, or specify the guarantees of the store.
+could just mention quelea
+
+I need to specify allowed operation consistencies against sets (here I can cite
+the issue from the book)
+allow consistencies? no writes at a higher level (not needed), no writes at a
+lower level (violation of safety), no writes at a differnt level (for now we
+only included totally ordered policies)
+
+finally show the god damn example! perhaps contrast it with the same thing built
+using two  or more different databases, with manual assignment of consistency
+and stuff.
+
+
+then the version thingie will be useful, for implementation, so I still need to
+figure out which versions should be allowed in a causally consistent set! 
+However, I could as well forget about it for now.
+
+but before all that, I need to introduce 
+
+perhaps looking at sagas as nate said could be useful.
 
 Our system model splits the domain of stored objects into a collection of named,
 disjoint regions Set s = \{x, y, z..\}. Each
@@ -173,8 +231,27 @@ local region, for which the following vector is stored:  (version, action\_id,
 source\_consistency) Any reads from local sets generate a similar set.
 
 \subsection{Comparison to traditional consistency definitions}
-Our data centric approach aims to implement the concept of "don't repeat
-yourself."
+Our data centric approach aims to avoid needing th repeat isolation 
+requirements for each transaction that touches data requiring isolated access
+(TODO I better read how the atomic sets people motivate their talk)
+and also protect data from misbehaving transactions. Our approach is pragmatic,
+and aims to reduce the need of monitoring long sequences of transaction, in
+order to track possible orders (TODO how accurate is that? I need to find a
+concrete example.)
+
+can we think if our regions as a partitioned shim layer?
+
+problems with trasaction chains:
+we can get anomalies such as that in the book, however, if we have a policy that
+always governs all transactions related to a data region, we can avoid
+anomalies, while hopefully not degrading performance.
+know what they are doing:
+
+
+\subsection{mapping consistency annotations and actions to transactions with
+  isolation levels}
+
+I could start first with an instance implementation, which is ours.
 
 
 
