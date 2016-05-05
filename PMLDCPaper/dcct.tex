@@ -100,8 +100,8 @@ Achieving this consistency level through linearizability(ref) or
 serializability(ref) entails well
 documented costs in terms of latency, availability and partition
 tolerance(refs). For this reason, many weaker consistency levels have been proposed,
-such as eventual consistency(ref), causal consistency(ref), atomic
-visibility(ref), and others(ref). 
+such as eventual consistency(ref), causal consistency(ref) and atomic
+visibility(ref).
 
 The choice of one of the above consistency levels depends on application
 correctness and performance requirements. For instance, there is no way eventual consistency
@@ -142,17 +142,16 @@ an example in a prototype language implementing this model.
 \section{Abstract System Model}
 Our system model allows developers to split the domain of stored objects into a
 collection of named, disjoint
-regions \texttt{Set s = \{x, y, z..\}}. Each
+regions \texttt{Region r = \{x, y, z..\}}. Each
 region contains objects that are related by a correctness invariant. The
 developer annotates each region with a consistency level \texttt{c} $\in$
 \texttt{ConsistencyClass}, where \texttt{ConsistencyClass} is a total order of
 consistency definitions based on strength, as defined in(ref). The system assumes that each
 set is annotated with the weakest consistency level capable of
 enforcing the implied invariant. To interact with regions, the developer
-declares \emph{actions}: \texttt{action a = \{o1, o2...\}} sequences of atomic
+declares \emph{actions} \texttt{action a = \{o1, o2...\}}: sequences of atomic
 read/write operations that perform a single logical task.
-Operations in the same action may interact with multiple sets. An attempt to
-execute an action may succeed or fail, where an action succeeds if and only if
+Operations in the same action may interact with multiple sets. An action succeeds if and only if
 all contained operations succeed. A consistency policy on a region applies only to
 all operations in an action interacting with it, as opposed to a complete
 history of actions. Hence it is important to
@@ -161,13 +160,13 @@ of each write within an action, for both failed and successful
 actions is determined by the consistency policy of the region it writes to. It
 is not possible to customize the consistency of any write operation, justified
 by the assumption that each data region is annotated with the weakest
-consistency set strong enough to enforce an invariant, then selecting a stronger
-consistency policy us not only pointless, but also can worsen
+consistency set strong enough to enforce an invariant; selecting a stronger
+consistency policy is not only pointless, but also can worsen
 availability or performance properties of the application. On the other hand,
 selecting a weaker consistency policy makes it impossible to prove that
 application invariants will appear satisfied for all concurrent operations.
 While these assumptions are indeed conservative, they ensure that no accidental
-mis-specification of consistency policies will lead to errors. In this way, the
+mis-specification of consistency policies on operations will lead to errors. In this way, the
 data-centric policies act as data guards, because they force all writes to go
 though the needed consistency protocol. Furthermore, preventing writes at higher
 consistency levels ensure that desired availability and partition tolerance
@@ -199,10 +198,7 @@ consistency regions to increase the flexibility of the model.
 
 \section{Sample Implementation and Example}
 We now describe a proof of concept implementation, showing only
-relevant key points. We do not claim this implementation to be of any practical
-use, however, it serves to demonstrate our model in simple terms, and present some examples.
-
-The objects in our system are integers or strings, represented as replicated registers with LWW
+relevant key points. The objects in our system are integers or strings, represented as replicated registers with LWW
 semantics(ref). At any point of time, different versions of each entity can
 co-exist, either on different replicas or on local client buffers. each version
 is assigned a timestamp as well as other metadata that might be needed to
@@ -211,7 +207,7 @@ consistency \texttt{ec} $<$ monotonic atomic view \texttt{mav} $<$
 serializability\footnote{The programming language Quelea(ref) provides similar
   consistency levels, as well as proof of order validity}. All
 objects in our implementation are at least eventually consistent by default, which means it
-is possible freely observe any versions (without monotonicity guarantee),
+is possible to freely observe any versions (without monotonicity guarantee),
 however, these versions will eventually converge. \texttt{mav} and \texttt{sc}
 can be used as region annotations. A region with \texttt{mav} annotation guarantees that all contained objects
 are observed at the same revision, and revisions are updated monotonically in
@@ -219,6 +215,7 @@ terms of versions. \texttt{sc} on a region guarantees that the last version of a
 contained objects is observed at all times. 
 
 The following listing shows a simple schema with annotated regions and actions:
+\begin{figure}[t!] 
 \begin{lstlisting}[basicstyle=\small]
 table Customer {
    @sc username: string
@@ -241,7 +238,8 @@ table opLog {
   amount: int
   orderSucceeded: int
 }
-action orderMysteryProduct(customer: Customer, amount: string) {
+action orderMysteryProduct(customer: Customer,
+  amount: string) {
   val prevAmount = mysteryProduct.amount
   if(prevAmount - amount >= 0 )
     mysteryProduct.write(prevAmount - amount)
@@ -257,8 +255,9 @@ action orderMysteryProduct(customer: Customer, amount: string) {
         customer.country, date.now(),, 0)
 }
 \end{lstlisting}
+\end{figure}
 
-A developer (who apparently does not care much about rare customer inconvenience)
+A developer (who apparently does not care much about occasional customer inconvenience)
 decided that \texttt{username}s must be unique, hence serializability is needed
 when allocating them. \texttt{name} and \texttt{country} are not very important, even if older
 data is shown or intermediate data is written, the customer can still correct
@@ -267,42 +266,31 @@ the data and eventually all replicas of these information will converge.
 payment information is \texttt{mav}, to avoid showing a mixed state of payment info, this still
 imposes the problem of using an older payment method when charging the customer,
 however, the developer is willing to accept this anomaly for the sake of
-availability. 
-
-we have omitted actions needed to create customers, or increase the stock of mystery
-product. Since \texttt{amount} is \texttt{sc} consistent on action level, and isolated as
-a until action execution is finished, we guarantee that the latest version of
-amount is always observed and updated for all actions interacting with it. 
-
-Action \texttt{orderMysteryProduct} is interesting because it does
+availability. \texttt{amount} is \texttt{sc} to ensure that all operations
+observe the latest version, and avoid selling non-existant items. For breviry,
+we show only one action \texttt{orderMysteryProduct}, which is particularly interesting because it does
 not have a single isolation level as is the case in regular transactions.
 However, we can see the flexibility and safety this approach gives the
 developer. It is possible to read and write at multiple consistency levels
 seamlessly, and it is correct according to consistency region specifications.
-Actions in our system can be compared to functions or procedures interacting
-with different data stores enforcing varying consistency guarantees. For
-instance, we can rethink of \texttt{orderMysteryProduct}  as a function that
+Actions in our system can be compared to generic functions interacting
+with different data stores that enforce varying consistency guarantees.
+\texttt{orderMysteryProduct}  can be seen as a function that
 reads and updates \texttt{amount} stored in a relational database
-transactionally, and also stores operation logs in an eventually consistent,
-key-value store. our actions are different in that, if any operation fails
-within an action, the entire action fails, and the programmer has to handle this
-failure appropriately. For brevity, we omit failure handling details here.
+transactionally (e.g. it could acquire long read and write locks on amount until it is
+signalled successful), and also stores operation logs in an eventually consistent,
+key-value store. Actions provide the additional property of singalling success
+of failure, and developers have to handle them appropriately. For brevity, we omit failure handling details here.
 
 \section{Conclusions and Future Work}
-Currently, we only support declaring disjoint regions. However, the ability to have
-nested regions is necessary to allow expressive and effecient implementations, 
-and we are currently working to support this feature.
-In general, it should be allowed to nest sets with stronger consistency within a
-set with weaker consistency, but not the other way around if we are to guarantee
-that the consistency of the compound region can be achieved. Another feature we
-are working to support is allowing actions to temporarily merge regions, which
-is needed to avoid higher-level data races(ref). Our approach will be analogous
-to(ref atomic sets), with restrictions of possible consistency of the resulting
-and component sets. 
-We are currently implementing a language cased on Cloud Types language(ref), that incorporates
-regions and actions, and we plan to evaluate it be encoding benchmarks such as
-TPC-C and TPC-W.
-
+Currently, we model only disjoint regions. However, supporting
+nesting and merging of regions in the spirit of(ref atomic sets) is necessary to allow expressive and efficient
+implementations. Another feature we are working to support is allowing actions to temporarily merge regions, which
+is needed to avoid higher-level data races(ref). Furthermore, there are systems
+that allow declaring invariants directly on data items, instead of 
+cosistency levels enforcing them(ref database invariants, ruby contraints,
+usergrid uniqueness decl). We plan to survey commonly used
+invariants in data-backed applications to support declaring them directly.
 %\appendix
 
 %\acks
