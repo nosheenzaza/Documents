@@ -69,23 +69,17 @@
 \maketitle
 
 \begin{abstract}
-The consistency level enforced by operations on replicated, distributed data is 
+The consistency level specified for operations over replicated data is 
 an important parameter in distributed applications, as it impacts correctness, 
-performance and availability. Nowadays, it is very common to find various consistency
-levels used in a single application, however, current frameworks do not facilitate
-working with and reasoning about different consistency properties of an application. 
-Furthermore, the problem of defining the semantics of operations enforcing different 
-consistency levels has not been well defined or studied. We propose a new
-approach for specifying consistency properties based on an important observation: 
+performance and availability. Nowadays, it is common to find various consistency
+levels used in a single application, however, current frameworks do not
+provide high-level abstractions for specifying or reasoning about different consistency properties of an application. 
+We propose a new approach for specifying consistency properties based on an important observation: 
 correctness criteria and invariants are a property of data, not operations, hence it is 
-reasonable to enable defining the consistency properties required to enforce them on data 
-rather than operations. We have defined a theoretical model for data-centric reasoning about consistency
-properties, and designed a domain-specific programming language we call Data Centric Cloud Types, that enables 
-declaring consistency properties, along with a type system to check the compatibility of declared consistency 
-properties. The benefits of this language are programs with clearer consistency properties which are 
-easier to define and reason about, and the possibility of optimising runtime and commit protocols to enable 
-exploiting consistency property definitions to enhance performance.
-\end{abstract}
+reasonable to enable defining the consistency properties required to enforce
+data invariants on data itself rather than operations. In this paper, we overview an abstract model
+for data-centric consistency specification, and demonstrate it through a simple,
+concrete programming language implementation. \end{abstract}
 
 \category{CR-number}{subcategory}{third-level}
 
