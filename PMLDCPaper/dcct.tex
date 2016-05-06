@@ -106,16 +106,16 @@ correctness and performance requirements. For instance, there is no way eventual
 can guarantee that a single airplane seat will not be assigned to two different
 people, or that different products are assigned
 unique sequential numbers within a district~\cite{bailis2014coordination, bailis2013highly}. However, it would work just fine
-in many non critical cases, such as recommending products, or counting users
-interested in a certain event. In order to achieve a certain consistency
-property in an application, a developer would typically select a storage system that
+in many non critical cases, such as creating and showing recommended products
+lists per user, or counting users interested in a certain event. In order to achieve a certain consistency
+property in an application, a developer should select a storage system that
 actually supports this level, then specify a consistency level per operation or
 sequences of operations. However, mapping high-level application consistency requirements to  a combination of
 low-level consistency settings on operations is a tedious and error-prone task, especially if
 the backing store supports multiple consistency levels. For instance,
 Cassandra~\cite{lakshman2010cassandra} and Riak allow specifying one of consistency levels
 \texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}... etc, describing the number of nodes that need to
-acknowledge the success of a read or write. It
+acknowledge the success of an operation. It
 is not immediately clear how consistency levels such as causal consistency or
 linearizability can be achieved, if at all.  Cassandra documentation state that,
 to achieve "strong consistency"\footnote{ Strong consistency here implies
@@ -133,9 +133,9 @@ The core cause of such problems is that current storage systems allow arbitrary
 interactions among low-level operations executing at different consistency levels. To
 tackle this problem, we propose a data-centric, declarative programming model, where
 consistency requirements are declared for data regions over which a correctness
-invariant must hold; and the low-level consistency settings for operations interacting with
+invariant must hold, and the low-level consistency settings for operations interacting with
 a region are assigned or restricted accordingly. In the rest of this paper, we describe this
-model and motivate its usefulness in addressing the above issues, then show
+model and motivate its usefulness in addressing the above issues by showing
 an example in a prototype language implementing this model.
 
 \section{Abstract System Model}
@@ -151,8 +151,8 @@ enforcing the implied invariant. To interact with regions, the developer
 declares \emph{actions} \texttt{action a = \{o1, o2...\}}: sequences of atomic
 read/write operations that perform a single logical task.
 Operations in the same action may interact with multiple sets. An action succeeds if and only if
-all contained operations succeed. A consistency policy of a region applies only to
-all operations within actions interacting with it, as opposed to a complete
+all contained operations succeed. A consistency policy of a region applies
+\emph{only} to all operations within actions interacting with it, as opposed to a complete
 history of actions. Hence it is important to
 correctly group related operations into a single action. The visibility
 of each write within an action, for both failed and successful
@@ -223,7 +223,8 @@ table Customer {
    @sc region address: 
      (city: string, street: string)
      
-   @mav region paymentInfo 
+   
+  @mav region paymentInfo 
      (paymentMethod: string, paymentInfo: string)
 
 }
@@ -284,14 +285,17 @@ action success is signaled), and also stores operation logs in an eventually con
 key-value store. Actions provide the additional property of singalling success
 of failure, and developers have to handle them appropriately. For brevity, we omit failure handling details here.
 
-\section{Conclusions and Future Work}
-Currently, we model only disjoint regions. However, supporting
-nesting and merging of regions in the spirit of~\cite{dolby2012data} is necessary to allow expressive and efficient
+\section{Conclusions, Current and  Future Work}
+We have presented here a model that supports only disjoint regions. However, supporting
+nesting and merging of regions in the spirit of~\cite{dolby2012data} is necessary to allow expressive and efficient 
 implementations. Another feature we are working to support is allowing actions to temporarily merge regions, which
-is needed to avoid higher-level data races~\cite{artho2003high}. Furthermore, there are systems
-that allow declaring invariants directly on data items, instead of 
-cosistency levels enforcing them~\cite{bailis2015feral}. We plan to survey commonly used
-invariants in data-backed applications to support declaring them directly.
+is needed to avoid higher-level data races~\cite{artho2003high}. We are
+currently developing a programming language and runtime with support for this extended model
+on top of ~\cite{burckhardt2012cloud}. Furthermore, there are systems
+that allow declaring invariants directly on data~\cite{bailis2015feral}, instead of 
+consistency levels enforcing them as we do. We plan to survey commonly used
+invariants in data-backed applications to support declaring them directly, which
+is easier and more readable.
 %\appendix
 
 %\acks
