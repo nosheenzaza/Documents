@@ -43,8 +43,8 @@
 \setlength{\pdfpageheight}{\paperheight}
 \setlength{\pdfpagewidth}{\paperwidth}
 
-\conferenceinfo{CONF 'yy}{Month d--d, 20yy, City, ST, Country}
-\copyrightyear{20yy}
+\conferenceinfo{PMLDC '16}{July 17, 2016, Rome, , Italy}
+\copyrightyear{2016}
 \copyrightdata{978-1-nnnn-nnnn-n/yy/mm}
 \copyrightdoi{nnnnnnn.nnnnnnn}
 
@@ -57,7 +57,7 @@
 \preprintfooter{Data-centric Consistency Policies} % 'preprint' option specified.
 
 \title{Data-centric Consistency Policies}
-\subtitle{A theory and programming model for distributed applications}
+\subtitle{A Theory and Programming Model for Distributed Applications}
 
 \authorinfo{Nosheen Zaza}
            {Universit\`a della Svizzera italiana (USI)}
@@ -81,7 +81,7 @@ data invariants on data itself rather than operations. In this paper, we overvie
 for data-centric consistency specification, and demonstrate it through a simple,
 concrete programming language implementation. \end{abstract}
 
-\category{CR-number}{subcategory}{third-level}
+%\category{CR-number}{subcategory}{third-level}
 
 % general terms are not compulsory anymore,
 % you may leave them out
@@ -216,7 +216,7 @@ terms of versions. \texttt{sc} on a region guarantees that the last version of a
 contained objects is observed and manipulated at all times. 
 
 The following listing shows a simple schema with annotated regions and actions:
-\begin{figure}[t!] 
+%\begin{figure}[t!] 
 \begin{lstlisting}[basicstyle=\small]
 table Customer {
    @sc username: string
@@ -224,6 +224,7 @@ table Customer {
    country: string
    @sc region address: 
      (city: string, street: string)
+     
    @mav region paymentInfo 
      (paymentMethod: string, paymentInfo: string)
 
@@ -256,7 +257,7 @@ action orderMysteryProduct(customer: Customer,
         customer.country, date.now(),, 0)
 }
 \end{lstlisting}
-\end{figure}
+%\end{figure}
 
 A developer (who apparently does not care much about occasional customer inconvenience)
 decided that \texttt{username}s must be unique, hence serializability is needed
