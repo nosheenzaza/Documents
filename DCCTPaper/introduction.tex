@@ -321,4 +321,19 @@ results. Finally, Section 7 outlines future work and concludes.
 % propagated across all replicas. Furthermore, concurrent, or out-of-order writes
 % must be ordered in a way that does not violate application correctness criteria.  
 
+% TODO Does it make sense for a policy to cover only the boundaries of a transaction
+% for every transaction?
+% I think yes, but we need to think how this interacts with the consistncy of
+% contained operations, the good thing about the data centric policies is that
+% they operate on transaction level, and affect all operations within a
+% transactions. For instance, in order to guarantee that the order transaction
+% is serializable, all operations within the transaction must be served serially
+% as well. For a mav transaction, all operations in it, related to a certain
+% set, must be mav as well. While it is generally possible for a transaction to
+% have a weaker consistency level that its component operations and still be
+% correct according to certain invariants, the set policy in our model restricts
+% both actions and individual operations for safely. 
+% TODO I need to formally describe a runtime, even a simple one for my language.
+% operations can guarantee that the current state observed came from a correct
+% ordering of operations, and can use it accordingly.
 

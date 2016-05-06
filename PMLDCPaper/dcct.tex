@@ -106,7 +106,7 @@ visibility(ref).
 The choice of one of the above consistency levels depends on application
 correctness and performance requirements. For instance, there is no way eventual consistency
 can guarantee that a single airplane seat will not be assigned to two different
-people(ref), or that differnet products will be assigned unique, universally
+people(ref), or that different products will be assigned unique, universally
 increasing IDs(bailis, and check the exact case). However, it would work just fine
 in many non critical cases, such as recommending products, or counting users
 interested in a certain event. In order to achieve a certain consistency
@@ -152,8 +152,8 @@ enforcing the implied invariant. To interact with regions, the developer
 declares \emph{actions} \texttt{action a = \{o1, o2...\}}: sequences of atomic
 read/write operations that perform a single logical task.
 Operations in the same action may interact with multiple sets. An action succeeds if and only if
-all contained operations succeed. A consistency policy on a region applies only to
-all operations in an action interacting with it, as opposed to a complete
+all contained operations succeed. A consistency policy of a region applies only to
+all operations within actions interacting with it, as opposed to a complete
 history of actions. Hence it is important to
 correctly group related operations into a single action. The visibility
 of each write within an action, for both failed and successful
@@ -209,10 +209,10 @@ serializability\footnote{The programming language Quelea(ref) provides similar
 objects in our implementation are at least eventually consistent by default, which means it
 is possible to freely observe any versions (without monotonicity guarantee),
 however, these versions will eventually converge. \texttt{mav} and \texttt{sc}
-can be used as region annotations. A region with \texttt{mav} annotation guarantees that all contained objects
+can be used as region annotations, and their guarantees apply on action level. A region with \texttt{mav} annotation guarantees that all contained objects
 are observed at the same revision, and revisions are updated monotonically in
 terms of versions. \texttt{sc} on a region guarantees that the last version of all
-contained objects is observed at all times. 
+contained objects is observed and manipulated at all times. 
 
 The following listing shows a simple schema with annotated regions and actions:
 \begin{figure}[t!] 
@@ -259,7 +259,8 @@ action orderMysteryProduct(customer: Customer,
 
 A developer (who apparently does not care much about occasional customer inconvenience)
 decided that \texttt{username}s must be unique, hence serializability is needed
-when allocating them. \texttt{name} and \texttt{country} are not very important, even if older
+when allocating them. It is still possible to read usernames at lower
+consistency levels if needed (i.e. if we only need to display the name). \texttt{name} and \texttt{country} are not very important, even if older
 data is shown or intermediate data is written, the customer can still correct
 the data and eventually all replicas of these information will converge.
 \texttt{address} is strongly consistency in order to avoid shipping to an old address.
@@ -267,7 +268,8 @@ payment information is \texttt{mav}, to avoid showing a mixed state of payment i
 imposes the problem of using an older payment method when charging the customer,
 however, the developer is willing to accept this anomaly for the sake of
 availability. \texttt{amount} is \texttt{sc} to ensure that all operations
-observe the latest version, and avoid selling non-existant items. For breviry,
+observe the latest version and avoid selling non-existant items. While it is possible to request a read at a lower
+level, our model ensures that we cannot write back an amount based on such reads. For brevity,
 we show only one action \texttt{orderMysteryProduct}, which is particularly interesting because it does
 not have a single isolation level as is the case in regular transactions.
 However, we can see the flexibility and safety this approach gives the
@@ -277,8 +279,8 @@ Actions in our system can be compared to generic functions interacting
 with different data stores that enforce varying consistency guarantees.
 \texttt{orderMysteryProduct}  can be seen as a function that
 reads and updates \texttt{amount} stored in a relational database
-transactionally (e.g. it could acquire long read and write locks on amount until it is
-signalled successful), and also stores operation logs in an eventually consistent,
+transactionally (e.g. ong read and write locks are acquired on amount until
+action success is signaled), and also stores operation logs in an eventually consistent,
 key-value store. Actions provide the additional property of singalling success
 of failure, and developers have to handle them appropriately. For brevity, we omit failure handling details here.
 
