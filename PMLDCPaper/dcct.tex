@@ -96,17 +96,17 @@ In modern distributed systems, data is often replicated
 to enhance availability and resilience to failure, and improve performance by
 placing data replicas closer to clients. However, managing the consistency of 
 replicated data is a nontrivial problem. Ideally, all clients must observe the most recent, correct data at all time 
-Achieving this consistency level through linearizability(ref) or
-serializability(ref) entails well
+Achieving this consistency level through linearizability~\cite{herlihy1990linearizability} or
+serializability~\cite{papadimitriou1979serializability} entails well
 documented costs in terms of latency, availability and partition
-tolerance(refs). For this reason, many weaker consistency levels have been proposed,
-such as eventual consistency(ref), causal consistency(ref) and atomic
-visibility(ref).
+tolerance~\cite{bailis2013highly, kraska2013mdcc}. For this reason, many weaker consistency levels have been proposed,
+such as eventual consistency~\cite{vogels2009eventually} causal
+consistency~\cite{lamport1978time} and snapshot isolation~\cite{kemme2000database}.
 
 The choice of one of the above consistency levels depends on application
 correctness and performance requirements. For instance, there is no way eventual consistency
 can guarantee that a single airplane seat will not be assigned to two different
-people(ref), or that different products will be assigned unique, universally
+people~\cite{bailis2014coordination}, or that different products will be assigned unique, universally
 increasing IDs(bailis, and check the exact case). However, it would work just fine
 in many non critical cases, such as recommending products, or counting users
 interested in a certain event. In order to achieve a certain consistency
@@ -115,19 +115,20 @@ actually supports this level, then specify a consistency level per operation or
 sequences of operations. However, mapping high-level application consistency requirements to  a combination of
 low-level consistency settings on operations is a tedious and error-prone task, especially if
 the backing store supports multiple consistency levels. For instance,
-Cassandra(ref) and Riak(ref) allow specifying one of consistency levels
+Cassandra~\cite{lakshman2010cassandra} and Riak allow specifying one of consistency levels
 \texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}... etc, describing the number of nodes that need to
 acknowledge the success of a read or write. It
 is not immediately clear how consistency levels such as causal consistency or
 linearizability can be achieved, if at all.  Cassandra documentation state that,
 to achieve "strong consistency"\footnote{ Strong consistency here implies
-neither linearizability or serializability, as explained in (quelea ref)} clients must issue quorum reads and writes,
+neither linearizability or serializability, as explained in~\cite{sivaramakrishnan2016representation}} clients must issue quorum reads and writes,
 however, nothing prevents a misbehaving client from issuing concurrent \texttt{one} writes and
 \texttt{quorum} reads on the same data, thus violating strong consistency for other clients. Another
 problem is when a client issuing \texttt{all} reads and writes. Which is completely
 unnecessary for enforcing any high-level consistency policies. Similar issues
 can occur in relational database systems, as it cannot be guaranteed that a
-sequence of transactions running at different isolation level preserve intended invariants(ref). 
+sequence of transactions running at different isolation level preserve intended
+invariants~\cite{gray1992transaction}. 
 
 % TODO the solution is not only for safety, but also for expressiveness. 
 The core cause of such problems is that current storage systems allow arbitrary
@@ -146,7 +147,7 @@ regions \texttt{Region r = \{x, y, z..\}}. Each
 region contains objects that are related by a correctness invariant. The
 developer annotates each region with a consistency level \texttt{c} $\in$
 \texttt{ConsistencyClass}, where \texttt{ConsistencyClass} is a total order of
-consistency definitions based on strength, as defined in(ref). The system assumes that each
+consistency definitions based on strength, as defined in~\cite{sivaramakrishnan2015declarative} The system assumes that each
 set is annotated with the weakest consistency level capable of
 enforcing the implied invariant. To interact with regions, the developer
 declares \emph{actions} \texttt{action a = \{o1, o2...\}}: sequences of atomic
@@ -199,16 +200,16 @@ consistency regions to increase the flexibility of the model.
 \section{Sample Implementation and Example}
 We now describe a proof of concept implementation, showing only
 relevant key points. The objects in our system are integers or strings, represented as replicated registers with LWW
-semantics(ref). At any point of time, different versions of each entity can
+semantics~\cite{burckhardt2014replicated}. At any point of time, different versions of each entity can
 co-exist, either on different replicas or on local client buffers. each version
 is assigned a timestamp as well as other metadata that might be needed to
 enforce a consistency property. We define a partial order of three consistency properties, eventual
 consistency \texttt{ec} $<$ monotonic atomic view \texttt{mav} $<$
-serializability\footnote{The programming language Quelea(ref) provides similar
+serializability\footnote{The programming language Quelea~\cite{sivaramakrishnan2015declarative} provides similar
   consistency levels, as well as proof of order validity}. All
 objects in our implementation are at least eventually consistent by default, which means it
 is possible to freely observe any versions (without monotonicity guarantee),
-however, these versions will eventually converge. \texttt{mav} and \texttt{sc}
+however, these versions will eventually converge. \texttt{mav}~\cite{bailis2013highly} and \texttt{sc}
 can be used as region annotations, and their guarantees apply on action level. A region with \texttt{mav} annotation guarantees that all contained objects
 are observed at the same revision, and revisions are updated monotonically in
 terms of versions. \texttt{sc} on a region guarantees that the last version of all
@@ -286,12 +287,11 @@ of failure, and developers have to handle them appropriately. For brevity, we om
 
 \section{Conclusions and Future Work}
 Currently, we model only disjoint regions. However, supporting
-nesting and merging of regions in the spirit of(ref atomic sets) is necessary to allow expressive and efficient
+nesting and merging of regions in the spirit of~\cite{dolby2012data} is necessary to allow expressive and efficient
 implementations. Another feature we are working to support is allowing actions to temporarily merge regions, which
-is needed to avoid higher-level data races(ref). Furthermore, there are systems
+is needed to avoid higher-level data races~\cite{artho2003high}. Furthermore, there are systems
 that allow declaring invariants directly on data items, instead of 
-cosistency levels enforcing them(ref database invariants, ruby contraints,
-usergrid uniqueness decl). We plan to survey commonly used
+cosistency levels enforcing them~\cite{bailis2015feral}. We plan to survey commonly used
 invariants in data-backed applications to support declaring them directly.
 %\appendix
 
@@ -305,13 +305,7 @@ invariants in data-backed applications to support declaring them directly.
 
 % The bibliography should be embedded for final submission.
 
-\begin{thebibliography}{}
-\softraggedright
-
-\bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
-P. Q. Smith, and X. Y. Jones. ...reference text...
-
-\end{thebibliography}
+\bibliography{../NosheenZazaBib}
 
 
 \end{document}
