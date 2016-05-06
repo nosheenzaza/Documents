@@ -101,13 +101,11 @@ serializability~\cite{papadimitriou1979serializability} entails well
 documented costs in terms of latency, availability and partition
 tolerance~\cite{bailis2013highly, kraska2013mdcc}. For this reason, many weaker consistency levels have been proposed,
 such as eventual consistency~\cite{vogels2009eventually} causal
-consistency~\cite{lamport1978time} and snapshot isolation~\cite{kemme2000database}.
-
-The choice of one of the above consistency levels depends on application
+consistency~\cite{lamport1978time} and snapshot isolation~\cite{kemme2000database}. The choice of one of the above consistency levels depends on application
 correctness and performance requirements. For instance, there is no way eventual consistency
 can guarantee that a single airplane seat will not be assigned to two different
-people~\cite{bailis2014coordination}, or that different products will be assigned unique, universally
-increasing IDs(bailis, and check the exact case). However, it would work just fine
+people, or that different products are assigned
+unique sequential numbers within a district~\cite{bailis2014coordination, bailis2013highly}. However, it would work just fine
 in many non critical cases, such as recommending products, or counting users
 interested in a certain event. In order to achieve a certain consistency
 property in an application, a developer would typically select a storage system that
