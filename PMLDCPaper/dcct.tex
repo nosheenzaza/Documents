@@ -70,16 +70,20 @@
 
 \begin{abstract}
 The consistency level specified for operations over replicated data is 
-an important parameter in distributed applications, as it impacts correctness, 
-performance and availability. Nowadays, it is common to find various consistency
-levels used in a single application, however, current frameworks do not
+an important parameter in distributed applications. It impacts correctness, 
+performance, and availability. It is now common to find single applications
+using many different consistency
+levels at the same time; however, current frameworks do not
 provide high-level abstractions for specifying or reasoning about different consistency properties of an application. 
-We propose a new approach for specifying consistency properties based on an important observation: 
-correctness criteria and invariants are a property of data, not operations, hence it is 
-reasonable to enable defining the consistency properties required to enforce
-data invariants on data itself rather than operations. In this paper, we overview an abstract model
+We propose an approach for specifying consistency properties based on the
+observation that
+correctness criteria and invariants are a property of data, not operations.
+Hence, it is reasonable to define the consistency properties
+  required to enforce various data invariants on the data itself rather
+  than on the operations. In this paper, we outline an abstract model
 for data-centric consistency specification, and demonstrate it through a simple,
-concrete programming language implementation. \end{abstract}
+concrete programming language implementation.
+\end{abstract}
 
 %\category{CR-number}{subcategory}{third-level}
 
@@ -93,40 +97,55 @@ distributed systems, domain-specific programming languages.
 
 \section{Introduction}
 In modern distributed systems, data is often replicated 
-to enhance availability and resilience to failure, and improve performance by
-placing data replicas closer to clients. However, managing the consistency of 
-replicated data is a nontrivial problem. Ideally, all clients must observe the most recent, correct data at all time 
-Achieving this consistency level through linearizability~\cite{herlihy1990linearizability} or
+to enhance availability and resilience to failure, and to improve performance by
+placing replicas closer to clients.
+However, managing the consistency of 
+replicated data is a nontrivial problem. Ideally, all clients should observe
+the most recent data at all times.
+Achieving this consistency level through
+linearizability~\cite{herlihy1990linearizability} or
 serializability~\cite{papadimitriou1979serializability} entails well
-documented costs in terms of latency, availability and partition
-tolerance~\cite{bailis2013highly, kraska2013mdcc}. For this reason, many weaker consistency levels have been proposed,
-such as eventual consistency~\cite{vogels2009eventually} causal
-consistency~\cite{lamport1978time} and snapshot isolation~\cite{kemme2000database}. The choice of one of the above consistency levels depends on application
-correctness and performance requirements. For instance, there is no way eventual consistency
+documented costs in terms of latency, availability, and partition
+tolerance~\cite{bailis2013highly, kraska2013mdcc}. For this reason,
+many weaker consistency levels have been proposed,
+such as eventual consistency~\cite{vogels2009eventually}, causal
+consistency~\cite{lamport1978time}, and snapshot isolation~\cite{kemme2000database}.
+The choice of one of the above consistency levels depends on application
+correctness and performance requirements. For instance, in a flight booking
+application, there is no way eventual consistency
 can guarantee that a single airplane seat will not be assigned to two different
-people, or that different products are assigned
-unique sequential numbers within a district~\cite{bailis2014coordination, bailis2013highly}. However, it would work just fine
-in many non critical cases, such as creating and showing recommended products
-lists per user, or counting users interested in a certain event. In order to achieve a certain consistency
-property in an application, a developer should select a storage system that
-actually supports this level, then specify a consistency level per operation or
-sequences of operations. However, mapping high-level application consistency requirements to  a combination of
-low-level consistency settings on operations is a tedious and error-prone task, especially if
-the backing store supports multiple consistency levels. For instance,
-Cassandra~\cite{lakshman2010cassandra} and Riak allow specifying one of consistency levels
-\texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}... etc, describing the number of nodes that need to
+people~\cite{bailis2014coordination, bailis2013highly}. However, eventual
+consistency works well
+in many non-critical cases, such as creating and showing recommended products
+lists, or counting users interested in a certain event.
+
+To enforce a certain consistency
+property in an application, a developer should selects a storage system that
+actually supports this property, then should specify the consistency level per
+operation or
+sequences of operations. However, mapping high-level application consistency requirements to a combination of
+low-level consistency settings on operations is often tedious and error-prone, especially if
+the backing store supports multiple consistency levels.
+For instance,
+Cassandra~\cite{lakshman2010cassandra} and Riak allow specifying one of many
+consistency levels
+\texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}, etc., describing the number of nodes that need to
 acknowledge the success of an operation. It
 is not immediately clear how consistency levels such as causal consistency or
-linearizability can be achieved, if at all.  Cassandra documentation state that,
-to achieve "strong consistency"\footnote{ Strong consistency here implies
+linearizability can be achieved, if at all.  The Cassandra documentation
+states that,
+to achieve ``strong consistency''\footnote{ Strong consistency here implies
 neither linearizability or serializability, as explained in~\cite{sivaramakrishnan2016representation}} clients must issue quorum reads and writes,
 however, nothing prevents a misbehaving client from issuing concurrent \texttt{one} writes and
 \texttt{quorum} reads on the same data, thus violating strong consistency for other clients. Another
-problem is when a client issuing \texttt{all} reads and writes. Which is completely
+problem is when a client issues \texttt{all} reads and writes, which is completely
 unnecessary for enforcing any high-level consistency policies. Similar issues
 can occur in relational database systems, as it cannot be guaranteed that a
 sequence of transactions running at different isolation level preserve intended
 invariants~\cite{gray1992transaction}. 
+
+% TODO: above is a bit of a jumble. Need to define what is meant by
+% consistency. Cassandra examples are a bit unclear.
 
 % TODO the solution is not only for safety, but also for expressiveness. 
 The core cause of such problems is that current storage systems allow arbitrary
@@ -141,20 +160,24 @@ an example in a prototype language implementing this model.
 \section{Abstract System Model}
 Our system model allows developers to split the domain of stored objects into a
 collection of named, disjoint
-regions \texttt{Region r = \{x, y, z..\}}. Each
+\emph{regions}. Each
 region contains objects that are related by a correctness invariant. The
 developer annotates each region with a consistency level \texttt{c} $\in$
-\texttt{ConsistencyClass}, where \texttt{ConsistencyClass} is a total order of
+\texttt{ConsistencyClass}, where \texttt{ConsistencyClass} is a total order
+% TODO: _total_ or _partial_??
+of
 consistency definitions based on strength, as defined in~\cite{sivaramakrishnan2015declarative} The system assumes that each
 set is annotated with the weakest consistency level capable of
 enforcing the implied invariant. To interact with regions, the developer
-declares \emph{actions} \texttt{action a = \{o1, o2...\}}: sequences of atomic
+declares \emph{actions}, sequences of atomic
 read/write operations that perform a single logical task.
 Operations in the same action may interact with multiple sets. An action succeeds if and only if
 all contained operations succeed. A consistency policy of a region applies
 \emph{only} to all operations within actions interacting with it, as opposed to a complete
 history of actions. Hence it is important to
-correctly group related operations into a single action. The visibility
+correctly group related operations into a single action.
+% What are the implications of this??
+The visibility
 of each write within an action, for both failed and successful
 actions is determined by the consistency policy of the region it writes to. It
 is not possible to customize the consistency of any write operation, justified
@@ -194,6 +217,19 @@ consistency regions to increase the flexibility of the model.
 %backend for our system, or specify the guarantees of the store.
 %could just mention quelea
 
+% TODO: the above is _way_ to vague. I don't know what our contribution is.
+% I would still extend the model of [15]
+% Something like:
+% We have the ordering predicates on actions ww, wr, rw:
+% ww(a,b): a writes x (version i), then b writes x (version i+1 [or j > i])
+% wr(a,b): a writes x (version i), then b reads x (version i)
+% rw(a,b): a reads x (version i), then b writes x (version i+1 [or j > i])
+% serializability: ww, wr, rw are acyclic
+% eventual consistency and MAV: as in [15]
+% with vis = (ww U wr U rw)*  [I think vis is transitive; if not, remove the *]
+% extend with causal consistency
+% extend with transactions
+% extend with sameregion predicates (cf. sameobject)
 
 \section{Sample Implementation and Example}
 We now describe a proof of concept implementation, showing only
