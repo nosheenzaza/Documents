@@ -1,0 +1,8 @@
+\newif\ifpreprint
+\@ifclasswith{sigplanconf}{preprint}{\preprinttrue}{\preprintfalse}
+
+\ifpreprint
+\newcommand\todo[1]{\textcolor{red}{#1}}
+\else
+\newcommand\todo[1]{}
+\fi
