@@ -30,9 +30,6 @@
 % TODO what is the state in database systems for atomicity of individual sql
 % statements? Can we guarantee isolation level 3 if sql statements are not
 % atomic?
-% TODO shorten abstract, Nate says too wordy.
-% TODO future work: nesting and intersection of consistent regions.
-% TODO think whether or not to include causal consistency.
 % TODO describe handlind deletions and predicate operations over entities later,
 % or mention it as future work.
 % TODO should I have set policies for "relations"? or not as they do not exist
@@ -94,6 +91,11 @@ concrete programming language implementation.
 %\terms
 %term1, term2
 
+% CHANGES:
+% add a citation for causal order implementation
+% add citations for common uses of eventual consistency
+
+
 \keywords
 distributed systems, domain-specific programming languages.
 
@@ -111,7 +113,7 @@ documented costs in terms of latency, availability, and partition
 tolerance~\cite{bailis2013highly, kraska2013mdcc}. For this reason,
 many weaker consistency levels have been proposed,
 such as eventual consistency~\cite{vogels2009eventually}, causal
-consistency~\cite{lamport1978time}, and snapshot isolation~\cite{kemme2000database}.
+consistency~\cite{lamport1978time, schiper1989new}, and snapshot isolation~\cite{kemme2000database}.
 The choice of one of the above consistency levels depends on application
 correctness and performance requirements. For instance, in a flight booking
 application, there is no way eventual consistency alone
@@ -119,7 +121,7 @@ can guarantee that a single airplane seat will not be assigned to two different
 people~\cite{bailis2014coordination, bailis2013highly}. However, eventual
 consistency works well
 in many non-critical cases, e.g., creating and showing recommended products
-lists, and is widely used in practice~\cite{???}.
+lists, and is widely used in practice~\cite{eventualeBay,eventualNetflix,hastorun2007dynamo}.
 
 To enforce a certain consistency
 property in an application, a developer should select a storage system that
@@ -127,14 +129,13 @@ actually supports this property, then should specify the consistency level per
 operation or
 sequences of operations. However, mapping high-level application consistency requirements to a combination of
 low-level consistency settings on operations is often tedious and error-prone, especially if
-the backing store supports multiple consistency levels~\cite{???}.
-For instance,
-Cassandra~\cite{lakshman2010cassandra} and Riak~\cite{???} allow specifying one of many
+the backing store supports multiple consistency levels. For instance,
+Cassandra~\cite{lakshman2010cassandra} and Riak~\cite{riak} allow specifying one of many
 consistency levels
 \texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}, etc., describing the number of nodes that need to
 acknowledge the success of an operation. It
 is not immediately clear how consistency levels such as causal consistency or
-linearizability can be achieved, if at all, using these systems.  The Cassandra documentation
+linearizability can be achieved, if at all, using these systems. The Cassandra documentation
 states that,
 to achieve ``strong consistency''\footnote{Strong consistency here implies
 neither linearizability or serializability, as explained in~\cite{sivaramakrishnan2016representation}} clients must issue quorum reads and writes,
@@ -150,10 +151,8 @@ invariants~\cite{gray1992transaction}.
 % consistency. Cassandra examples are a bit unclear.
 
 % TODO the solution is not only for safety, but also for expressiveness. 
-The core cause of such problems is that current storage systems allow arbitrary
-interactions among low-level operations executing at different consistency levels. To
-tackle this problem, we propose a data-centric, declarative programming model, where
-consistency requirements are declared for data regions over which a correctness
+To tackle such problems, we propose a data-centric, declarative programming model, where
+high-level consistency requirements are declared for data regions over which a correctness
 invariant must hold, and the low-level consistency settings for operations interacting with
 a region are assigned or restricted accordingly. In the rest of this paper, we describe our
 model and motivate its usefulness in addressing the above issues by showing
