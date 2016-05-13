@@ -69,7 +69,7 @@
 \maketitle
 
 \begin{abstract}
-The consistency level specified for operations over replicated data is 
+The consistency level of operations over replicated data is 
 an important parameter in distributed applications. It impacts correctness, 
 performance, and availability. It is now common to find single applications
 using many different consistency
@@ -93,7 +93,7 @@ concrete programming language implementation.
 %term1, term2
 
 \keywords
-distributed systems, domain-specific programming languages.
+distributed systems, eventual consistency, domain-specific programming languages
 
 \section{Introduction}
 In modern distributed systems, data is often replicated 
@@ -104,8 +104,8 @@ replicated data is a nontrivial problem. Ideally, all clients should observe
 the most recent data at all times.
 Achieving this consistency level through
 linearizability~\cite{herlihy1990linearizability} or
-serializability~\cite{papadimitriou1979serializability} entails well
-documented costs in terms of latency, availability, and partition
+serializability~\cite{papadimitriou1979serializability} entails
+well-documented costs in terms of latency, availability, and partition
 tolerance~\cite{bailis2013highly, kraska2013mdcc}. For this reason,
 many weaker consistency levels have been proposed,
 such as eventual consistency~\cite{vogels2009eventually}, causal
@@ -116,25 +116,26 @@ application, there is no way eventual consistency alone
 can guarantee that a single airplane seat will not be assigned to two different
 people~\cite{bailis2014coordination, bailis2013highly}. However, eventual
 consistency works well
-in many non-critical cases, e.g., creating and showing recommended products
-lists, and is widely used in practice~\cite{eventualeBay,eventualNetflix,hastorun2007dynamo}.
+in many non-critical cases, for example, creating and showing product
+recommendations, and is widely used in practice~\cite{eventualeBay,eventualNetflix,hastorun2007dynamo}.
 
 To enforce a certain consistency
 property in an application, a developer should select a storage system that
 actually supports this property, then should specify the consistency level per
 operation or
 sequences of operations. However, mapping high-level application consistency requirements to a combination of
-low-level consistency settings on operations is often tedious and error-prone, especially if
-the backing store supports multiple consistency levels. For instance,
+low-level consistency settings on operations is often tedious and error-prone.
+For instance,
 Cassandra~\cite{lakshman2010cassandra} and Riak~\cite{riak} allow specifying one of many
-consistency levels
-\texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}, etc., describing the number of nodes that need to
+consistency levels:
+\texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}, etc., describing
+the set of nodes that need to
 acknowledge the success of an operation. It
 is not immediately clear how consistency levels such as causal consistency or
 linearizability can be achieved, if at all, using these systems. The Cassandra documentation
 states that,
 to achieve ``strong consistency''\footnote{Strong consistency here implies
-neither linearizability or serializability, as explained in~\cite{sivaramakrishnan2016representation}} clients must issue quorum reads and writes,
+neither linearizability or serializability, as explained in~\cite{sivaramakrishnan2016representation}.} clients must issue quorum reads and writes,
 however, nothing prevents a misbehaving client from issuing concurrent \texttt{one} writes and
 \texttt{quorum} reads on the same data, thus violating strong consistency for other clients. Another
 problem is when a client issues \texttt{all} reads and writes, which is completely
@@ -152,11 +153,14 @@ model inspired by~\cite{dolby2012data}, where
 high-level consistency requirements are declared for data regions that share a
 consistency property, and low-level consistency settings for operations interacting with
 regions are assigned or restricted accordingly. We
-describe the abstract model in Section 1, and in Section 2 we motivate its usefulness in addressing the above issues by showing
+describe the abstract model in Section~\ref{sec:model}, and in
+Section~\ref{sec:example} we motivate its usefulness in addressing the above issues by showing
 an example in a prototype language implementing this model.
+In Section~\ref{sec:conclusion} we conclude.
 
 
 \section{Abstract System Model}
+\label{sec:model}
 Our system model allows developers to split the domain of stored objects into a
 collection of named, disjoint
 \emph{regions}. Each
@@ -165,11 +169,11 @@ developer annotates each region with a consistency level \texttt{c} $\in$
 \texttt{ConsistencyClass}, where \texttt{ConsistencyClass} is a partial order
 of consistency definitions based on strength, as defined
 in~\cite{sivaramakrishnan2015declarative}. The system assumes that each
-set is annotated with a consistency level capable of
+region is annotated with a consistency level capable of
 enforcing any implied invariants. To interact with regions, the developer
 declares \emph{actions}, sequences of atomic
-read/write operations that perform a single logical task, and may interact with
-multiple sets. An action succeeds if and only if all contained operations
+read--write operations that perform a single logical task, and may interact with
+multiple regions. An action succeeds if and only if all contained operations
 succeed. The visibility of each write, and the recency of
 data observed by each read within an action, for both failed and successful
 actions is determined by the consistency policy of the region with which reads
@@ -220,78 +224,84 @@ consistency regions to increase the flexibility of the model.
 % extend with sameregion predicates (cf. sameobject)
 
 \section{Sample Implementation and Example}
-We now describe a proof of concept implementation, showing only
-relevant key points. The objects in our system are integers or strings, represented as replicated registers with LWW
+\label{sec:example}
+We now describe a proof of concept implementation.
+The objects in our system are integers or strings,
+represented as replicated registers with last-writer-wins
 semantics~\cite{burckhardt2014replicated}. At any point in time, different
 versions of each entity may
 co-exist, either on different replicas or in local client buffers. Each version
 is assigned a timestamp as well as other metadata that might be needed to
 enforce a consistency property. We define a partial order of three consistency properties, eventual
-consistency \texttt{ec} $\prec$ monotonic atomic view \texttt{mav}~\cite{bailis2013highly}  $\prec$
-serializability \texttt{sr}, which apply on the action level.\footnote{The programming language Quelea~\cite{sivaramakrishnan2015declarative} provides similar
+consistency (\texttt{EC}) $\prec$ monotonic atomic view (\texttt{MAV})~\cite{bailis2013highly}  $\prec$
+serializability (\texttt{SR}), which apply on the action level.\footnote{The programming language Quelea~\cite{sivaramakrishnan2015declarative} provides similar
 consistency levels, as well as a proof of order validity} 
 All objects in our implementation are at least eventually consistent by default, which means it
 is possible to freely observe any versions (without monotonicity guarantee), and
-eventually all versions converge. A region annotated \texttt{mav} guarantees all new versions written by an
-action are observed together, and that version update are observed monotonically. The annotation \texttt{sr} on a
+eventually all versions converge. A region annotated \texttt{MAV} guarantees all new versions written by an
+action are observed together, and that version updates are observed
+monotonically. The \texttt{SR} annotation on a
 region guarantees that the latest version of all
 contained objects is observed and manipulated at all times. 
 
-The following listing shows a simple schema with annotated regions and actions.
-We show \texttt{@ec} annotations only for clarity.
 \begin{figure}[t!] 
 \begin{lstlisting}[basicstyle=\small\ttfamily]
 class Customer {
-  @sr username: string
-  @ec name: string
-  @ec gender: string
-  @sr address: 
-  (street: string, city: string, country: string) 
-  @mav paymentInfo:
-  (paymentMethod: string, paymentInfo: string)
+  @SR username: String
+  @EC name: String
+  @EC gender: String
+  @SR address: 
+    (street: String, city: String, country: String) 
+  @MAV paymentInfo:
+    (paymentMethod: String, paymentInfo: String)
 }
 object mysteryProduct {
-  @ec price: int
-  @sr amount: int
+  @EC price: Int
+  @SR amount: Int
 }
-@ec class orderLog {
-  username: string
-  country: string
-  date: string
-  amount: int
-  orderSucceeded: int
+@EC class orderLog {
+  username: String
+  country: String
+  date: String
+  amount: Int
+  orderSucceeded: Int
 }
 action orderMysteryProduct(
- customer: Customer, amount: int) {
+ customer: Customer, amount: Int) {
   val prevAmount = mysteryProduct.amount
-  if(prevAmount - amount >= 0 )
-    mysteryProduct.write(prevAmount - amount)
+  if (prevAmount - amount >= 0) {
+    mysteryProduct.amount = prevAmount - amount
     submitOrder(
      amount, 
      customer.address, 
-     mysteryProduct.price * amount )
-
+     mysteryProduct.price * amount)
     orderLog.insert(customer.username, 
-      @ec customer.address.country, 
+      @EC customer.address.country, 
       Date.now(), amount, 1)
-  else 
+  } else {
     displayLowStockError() 
     orderLog.insert(customer.username, 
-      @ec customer.address.country, 
+      @EC customer.address.country, 
       Date.now(), amount, 0)
+  }
 }
 \end{lstlisting}
+\caption{Example program with data-centric consistency policies}
+\label{fig:example}
 \end{figure}
 
+The listing in Figure~\ref{fig:example} shows a simple schema with annotated
+regions and actions. Fields in classes and singleton objects are annotated
+with their consistency level.
 In this example, the developer decided that \texttt{username}s must be 
 unique, hence serializability is needed
 when allocating them. It is still possible to read usernames at lower
 consistency levels if needed (e.g., if we only need to display the name). 
 \texttt{name} and \texttt{gender} are not very important, even if older
 data is shown or intermediate data is written, the customer can still correct
-the it and eventually all replicas of these information will converge.
+it and eventually all replicas of this information will converge.
 \texttt{address} is strongly consistency in order to avoid shipping to an old address.
-Payment information is \texttt{mav}, to avoid showing a mixed state of payment info, this still
+Payment information is \texttt{MAV}, to avoid showing a mixed state of payment info, this still
 imposes the problem of using an older payment method when charging the customer,
 however, the developer is willing to accept this anomaly for the sake of
 availability. \texttt{amount} is \texttt{sc} to ensure that all operations
@@ -307,18 +317,21 @@ Actions in our system can be compared to generic functions interacting
 with different data stores that enforce varying consistency guarantees.
 \texttt{orderMysteryProduct} can be seen as a function that
 reads and updates \texttt{amount} stored in a relational database
-transactionally (e.g. read and write locks are acquired on amount until
+transactionally (e.g., read and write locks are acquired on \texttt{amount} until
 action success is signaled), and also stores operation logs in an eventually consistent,
 key-value store. Actions provide the additional property of signaling success
 of failure, and developers have to handle them appropriately. For brevity, we omit failure handling details here.
 
 \section{Conclusions, Current and Future Work}
-We have presented here a model that supports only disjoint regions. However, supporting
-nesting and merging of regions in the spirit of~\cite{dolby2012data} is necessary to allow expressive and efficient 
-implementations. Another feature we are working to support is allowing actions to temporarily merge regions, which
-is needed to avoid higher-level data races~\cite{artho2003high}. We are
+\label{sec:conclusion}
+We have presented here a model that supports only disjoint regions. We plan to
+extend the model with support 
+for 
+nesting and merging of regions in the spirit of~\cite{dolby2012data}.
+Temporarily merging regions is useful for
+avoid higher-level data races~\cite{artho2003high}. We are
 currently developing a programming language and runtime with support for this extended model
-on top of ~\cite{burckhardt2012cloud}. Furthermore, there are systems
+on top of cloud types~\cite{burckhardt2012cloud}. Furthermore, there are systems
 that allow declaring invariants directly on data~\cite{bailis2015feral}, instead of 
 consistency levels enforcing them as we do. We plan to survey commonly used
 invariants in data-backed applications to support declaring them directly, which
