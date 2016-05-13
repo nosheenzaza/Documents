@@ -119,11 +119,11 @@ consistency works well
 in many non-critical cases, for example, creating and showing product
 recommendations, and is widely used in practice~\cite{eventualeBay,eventualNetflix,hastorun2007dynamo}.
 
-To enforce a certain consistency
-property in an application, a developer should select a storage system that
-actually supports this property, then should specify the consistency level per
-operation or
-sequences of operations. However, mapping high-level application consistency requirements to a combination of
+In current systems, to enforce a certain consistency
+property in an application, a developer selects a storage system that
+supports this property, then specifies the consistency level per
+operation or per
+sequence of operations. However, mapping high-level application consistency requirements to a combination of
 low-level consistency settings on operations is often tedious and error-prone.
 For instance,
 Cassandra~\cite{lakshman2010cassandra} and Riak~\cite{riak} allow specifying one of many
@@ -164,13 +164,13 @@ In Section~\ref{sec:conclusion} we conclude.
 Our system model allows developers to split the domain of stored objects into a
 collection of named, disjoint
 \emph{regions}. Each
-region contains objects that are related by a consistency property. The
-developer annotates each region with a consistency level \texttt{c} $\in$
-\texttt{ConsistencyClass}, where \texttt{ConsistencyClass} is a partial order
-of consistency definitions based on strength, as defined
-in~\cite{sivaramakrishnan2015declarative}. The system assumes that each
-region is annotated with a consistency level capable of
-enforcing any implied invariants. To interact with regions, the developer
+region contains objects that are related by some application-specific consistency property. The
+developer annotates each region with a consistency level 
+strong enough to enforce the implied invariants. The consistency levels form
+a partial order
+based on strength, as defined
+in~\cite{sivaramakrishnan2015declarative}.
+To interact with regions, the developer
 declares \emph{actions}, sequences of atomic
 read--write operations that perform a single logical task, and may interact with
 multiple regions. An action succeeds if and only if all contained operations
@@ -290,9 +290,10 @@ action orderMysteryProduct(
 \label{fig:example}
 \end{figure}
 
-The listing in Figure~\ref{fig:example} shows a simple schema with annotated
-regions and actions. Fields in classes and singleton objects are annotated
-with their consistency level.
+Figure~\ref{fig:example} shows a simple schema with annotated
+regions and actions. Regions are annotated 
+with their consistency level. For simplicity, regions are simply fields,
+which may be records containing multiple simple fields.
 In this example, the developer decided that \texttt{username}s must be 
 unique, hence serializability is needed
 when allocating them. It is still possible to read usernames at lower
@@ -300,15 +301,16 @@ consistency levels if needed (e.g., if we only need to display the name).
 \texttt{name} and \texttt{gender} are not very important, even if older
 data is shown or intermediate data is written, the customer can still correct
 it and eventually all replicas of this information will converge.
-\texttt{address} is strongly consistency in order to avoid shipping to an old address.
-Payment information is \texttt{MAV}, to avoid showing a mixed state of payment info, this still
+\texttt{address} is strongly consistency to avoid shipping to an old address.
+Payment information is declared \texttt{MAV}, to avoid showing a mixed state of payment info, this still
 imposes the problem of using an older payment method when charging the customer,
 however, the developer is willing to accept this anomaly for the sake of
 availability. \texttt{amount} is \texttt{sc} to ensure that all operations
 observe the latest version and avoid selling non-existent items. While it is possible to request a read at a lower
 level, our model ensures that we cannot write back an amount based on such reads. For brevity,
-we show only one action \texttt{orderMysteryProduct}, which is particularly interesting because it does
-not have a single isolation level as is the case in regular transactions.
+we show only one action \texttt{orderMysteryProduct}. This action does
+not have a single isolation level, as is the case in regular transactions;
+rather, the action manipulates data with many different consistency levels.
 However, we can see the flexibility and safety this approach gives the
 developer. It is possible to read and write at multiple consistency levels
 seamlessly, and it is correct according to consistency region specifications.
