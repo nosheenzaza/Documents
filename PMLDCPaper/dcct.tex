@@ -12,6 +12,7 @@
 \usepackage{txtt}
 \usepackage{color}
 \usepackage{defs}
+\usepackage{hyperref}
 
 \newcommand{\cL}{{\cal L}}
 
@@ -68,21 +69,28 @@
 
 \maketitle
 
+% Abstract change: mention that there is support for for reasoning about 
+% multiple consistency levels in research, however the frameworks are
+% complicated, ours is good in that it is simpler. 
 \begin{abstract}
 The consistency level of operations over replicated data is 
 an important parameter in distributed applications. It impacts correctness, 
 performance, and availability. It is now common to find single applications
 using many different consistency
-levels at the same time; however, current frameworks do not
-provide high-level abstractions for specifying or reasoning about different consistency properties of an application. 
+levels at the same time; however, current commercial frameworks do not
+provide high-level abstractions for specifying or reasoning about different
+consistency properties of an application. Research frameworks that do tend to require a
+substantial effort from developers to specify operation dependencies, orderings
+and invariants to be preserved.
 We propose an approach for specifying consistency properties based on the
 observation that
 correctness criteria and invariants are a property of data, not operations.
 Hence, it is reasonable to define the consistency properties
-  required to enforce various data invariants on the data itself rather
-  than on the operations. In this paper, we outline an abstract model
+required to enforce various data invariants on the data itself rather than on the operations. 
+The result is a system that is simpler to describe and reason about. 
+In this paper, we outline an abstract model
 for data-centric consistency specification, and demonstrate it through a simple,
-concrete programming language implementation.
+concrete programming language prototype implementation.
 \end{abstract}
 
 %\category{CR-number}{subcategory}{third-level}
@@ -155,7 +163,9 @@ consistency property, and low-level consistency settings for operations interact
 regions are assigned or restricted accordingly. We
 describe the abstract model in Section~\ref{sec:model}, and in
 Section~\ref{sec:example} we motivate its usefulness in addressing the above issues by showing
-an example in a prototype language implementing this model.
+an example in a prototype language implementing this model\footnote{This
+  language is a work in progress. The project that can be found at
+  \url{https://github.com/amanjpro/languages-a-la-carte/}}.
 In Section~\ref{sec:conclusion} we conclude.
 
 
@@ -223,9 +233,10 @@ consistency regions to increase the flexibility of the model.
 % extend with transactions
 % extend with sameregion predicates (cf. sameobject)
 
+% Changes here: clarify the status of the application.
 \section{Sample Implementation and Example}
 \label{sec:example}
-We now describe a proof of concept implementation.
+We now describe a subset of a proof of concept implementation we are currently working on.
 The objects in our system are integers or strings,
 represented as replicated registers with last-writer-wins
 semantics~\cite{burckhardt2014replicated}. At any point in time, different
@@ -322,9 +333,52 @@ reads and updates \texttt{amount} stored in a relational database
 transactionally (e.g., read and write locks are acquired on \texttt{amount} until
 action success is signaled), and also stores operation logs in an eventually consistent,
 key-value store. Actions provide the additional property of signaling success
-of failure, and developers have to handle them appropriately. For brevity, we omit failure handling details here.
+of failure, and developers have to handle them appropriately. For brevity, we
+omit failure handling details here, however, a model such as{the transactions
+  with futures Nate showed me? cannot find it}, which combines transactions with
+futures can be integrated
+nicely into our language. 
 
+\section{Related Work}
 \section{Conclusions, Current and Future Work}
+Our approach is mainly inspired by Vaziri el al[]. In their work, the memory is
+split to regions to which accesses must be serial and regions with no access
+control, the main idea is that for regions that require serializability, all
+modifications must be serial, and hence the programmer must serialize all
+execution paths interacting with such a region, instead, they allow the
+programmer to declare an atomic region, and the compiler then inserts
+synchronization codes on all units of work interacting. 
+We extend their approach to allow declaring multiple consistency
+policies, not only linearizabiity. Kraska et. al have proposed a data-centric
+approach supporting multiple consistency levels, and their notion of transaction
+is similar to our notion of actions, however, they assume that the
+underlying store is at least causal, hence do not support weaker consistency
+models, they also allow some data regions to have adaptable consistency, and
+accept invariant violations at a monetary cost. Furthermore the invariants
+expressed at more complicated that ours, it is not possible to exrpress all
+possible real-world invariants. By specifying a consistency policy instead of an
+invariant, we can guarantee that a wider range of invariants can be expressed in
+a data centric way, hence we describe our consistency policices as (soft
+invariants (not sure if this is such a great name))Bailis el al{feral} describe
+a.... In his thesis work and a number of papers{refs}, Adya desrcibes the mixing
+theorem, which desribes  transactions with multiple consistnecy
+policies must interact and behave to preseve the isolation requirements for all
+of them. The implication is that transactions running at lower isolation levels
+must "know what they are doing", in terms of application invariants they must
+preserve. Our approach facilitates reasoning about such systems, because data
+for which invariants must be preseved is protected by a suitable consistency
+policy, hence eliminating the risk of having transactiosn with unsuitable, it
+also gathers the reasoning in one place, instead of a combinations of policies
+spread over all operations accessing the data. Gotsman et al[] propose a proof
+rule to show that a particular choice of consistency guarantees  .Quelea also
+uses simple first order logic predicates to describe operations sequencing and
+visibility, this allows operations with multiple consistency levels to interact
+over the same data, even write at different consistency levels, while re require 
+all write operations to happen at a consistency level that satisfies that
+invariant to be observed by the strongest operation. While their approach is
+more flexible, it requires keeping track of the entire history of operations,
+and describing the itneractions among all operations. Our approach is arguably
+simpler to express and reason about. 
 \label{sec:conclusion}
 We have presented here a model that supports only disjoint regions. We plan to
 extend the model with support 
