@@ -1,0 +1,117 @@
+----------------------- REVIEW 1 ---------------------
+PAPER: 6
+TITLE: Data-centric Consistency Policies: A Programming Model for Distributed Applications with Tunable Consistency
+AUTHORS: Nosheen Zaza and Nathaniel Nystrom
+
+OVERALL EVALUATION: -1 (weak reject)
+
+----------- OVERALL EVALUATION -----------
+Paper 6 presents a “tunable” consistency model for distributed storage systems based on associating consistency levels with data rather than with operations on the store.  It (briefly) describes a proof-of-concept in which programs are adorned with data-centric consistency annotations for three distinct consistency levels (EC, serializable and “monotonic atomic visibility, defined in the HAT work of Bailis et al).
+
+I certainly like the idea of “data-centric consistency” -- at the end of the day, consistency guarantees exist to ease the task of reasoning whether the data stored in (and retrieved from) distributed storage systems is correct.  However, there is not enough meat in this submission for me to tell whether the authors have nudged the state of the art.  In practice, queries and systems will certainly need to “mix” data from different consistency levels. To a first approximation, such mixings (like taint analysis) invariably return data that is of the lowest level of any of its inputs. Complex workloads that query existing data and then store results will, in the fullness of time, store only EC data -- right?  One rotten apple destroys the whole batch? Concretely, in Figure 1 it would appear that the consistency level of OrderLog must be EC.  Is this ok?  And what did doing the lower-consistency read actually buy us in this example?
+
+The paper has no related work, which is  a pity since I would have liked to have seen this compared to other work on data-centric consistency, in particular the “consistency rationing” work of Kraska et al.  More explanation of the partial order (which I assume is obvious? But perhaps not) defined in [20] and the programming model defined in [10] would have made the paper more self-contained.  Broadly speaking, if the paper had at least sketched the constraints and policies of the target system it would have been possible to tell if the ideas presented were novel.
+
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 6
+TITLE: Data-centric Consistency Policies: A Programming Model for Distributed Applications with Tunable Consistency
+AUTHORS: Nosheen Zaza and Nathaniel Nystrom
+
+OVERALL EVALUATION: 2 (accept)
+
+----------- OVERALL EVALUATION -----------
+The paper proposes a new way of specifying consistency of accesses in weakly
+consistent databases. The idea is to group objects into "regions" and specify
+consistency on a per-region basis. The programmer can do an "action" across
+regions, with the accesses to a given region subject to the consistency
+specified for this region. This is different from the usual transactions, where
+all accesses have the same level of consistency. The authors already have a
+proof-of-concept implementation of their proposal.
+
+The question of what the right interfaces are for weakly consistent databases is
+open. There have been a number of proposals for specifying consistency levels,
+mostly on a per-operation basis. The authors' proposal seems more high-level to
+me, so is perhaps easier for programmers to deal with. So I think that the
+proposal is interesting and the paper is appropriate for the workshop.
+
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 6
+TITLE: Data-centric Consistency Policies: A Programming Model for Distributed Applications with Tunable Consistency
+AUTHORS: Nosheen Zaza and Nathaniel Nystrom
+
+OVERALL EVALUATION: 2 (accept)
+
+----------- OVERALL EVALUATION -----------
+This paper presents a programming model in which the developer can define the level of consistency of an object or many objects -- called "region". The model considers invariants on data itself rather than on operations. 
+
+This idea of considering data-centric consistency to define invariants at the programming level is novel as far as I know. Other ideas like I-confluence of Bailis et al. and explicit consistency by Balegas et al. focus on operations to preserve invariants. The model looks interesting, though the study needs more investigation (see below). I advocate this paper to appear in the proceeding of PMLDC.
+
+How to improve
+Considering the # of pages limit, the authors can better show who/how to define the consistency within a region in the given example. In a longer paper, I would advise the authors to investigate how data-centric model compare to an op-centric model (as in explicit consistency by Balegas et al. ) and to consider more consistency models (like causality).
+
+One concern I have is that this model is not easy to verify. Giving the developer such a freedom in defining consistency models at the object level looks dangerous. It is crucial to prove the correctness of the system and show how or who will ensure this correctness? In addition, even if the system is correct, how can we make sure the system as a whole is coherent? These subjects are necessary for a longer paper, I believe.
+
+Other minor comments.
+
+Section 1
+
+- Reference missing:  "The Cassandra documentation states that, to achieve “strong consistency”1 clients must issue quorum reads and writes, however, nothing prevents a misbehaving client from issuing concurrent one writes and quorum reads on the same data, thus violating strong consistency for other clients."
+
+- This paper [20] is very recent and thus explaining how "a developer can define a consistency model" is crucial: The consistency levels form a partial order based on strength, as defined in [20].
+
+
+----------------------- REVIEW 4 ---------------------
+PAPER: 6
+TITLE: Data-centric Consistency Policies: A Programming Model for Distributed Applications with Tunable Consistency
+AUTHORS: Nosheen Zaza and Nathaniel Nystrom
+
+OVERALL EVALUATION: 2 (accept)
+
+----------- OVERALL EVALUATION -----------
+This paper presents a programming model for distributed systems in which the programmer can attribute regions of their code with different levels of consistency. The novelty of this approach is in its contrast with the traditional distributed programming models in which the operations get attributed with (different) consistency levels. They argue that this shift of focus in consistency specification will facilitate reasoning about code that runs in a distributed fashion.
+
+The second paragraph of their Introduction lists a number of current challenges the frameworks for distributed programming face. Except for its last item, every item in that list rings a bell for me. Yet, I fail to understand how their proposed model addresses those challenges. Furthermore, I can't figure out whether their model is an unimplemented idea, a prototyped one, or an ongoing development.
+
+Despite the immaturity of the paper, I recommend the paper to be accepted. From what I understand, although some being in long-term industrial use, the tools currently available for programming distributed systems are still very immature. I believe discussion at the foundational level is still to be taken up before mature programming models can emerge. I expect this paper to raise fruitful such discussions in the workshop.
+
+Here is more detailed feedback:
+
+- The paper is under the mistaken impression that there currently is no support for reasoning about code with hybrid consistency specifications. The authors are invited to take a look to [1].
+
+- Section 2 doesn't quite present the model itself. I'd rather call that something like "Regions and their Interactions." It's Section 3 that is presenting the model.
+
+- Section 2 is too dense for text-only. A tabular summary is inevitable for the reader to be able to hold all that information in head.
+
+- Section 3 opens with mentioning "a proof of concept implementation." Where is this implementation available? Provide reference or weblink.
+
+- sentence 2, paragraph 2, section 2: "regions are simply fields." The following too, however, is an excerpt from Fig. 1 (that I fail to find an explanation for in the text): "@EC class orderLog {...}".
+
+- bottom of column 1, page 2: "amount is sc to ensure that all operations observe the latest version and avoid selling non-existent items." Firstly, there are two "amount"s in the code. Secondly, I think the sentence opens with a typo: "amount is SR..."
+
+- last sentence, penultimate paragraph, section 3: "It is possible to..., and it is correct according to consistency region specifications." What is the statement of this correctness result?
+
+- last paragraph, section 3: "Actions provide ... success of failure" --> "Actions provide ... success or failure."
+
+- trailing sentence, section 3: "For brevity, we omit failure handling details here." Fine! You only have two pages anyway. But, you should refer to elsewhere then, where the reader can check things up.
+
+- Which language is Fig. 1 in? Is that just a mock-up?
+
+- sentence 3, section 4: "Temporarily ... is useful for ..." --> "Temporarily ... is useful to ..."
+
+[1] http://dblp.uni-trier.de/rec/bibtex/conf/popl/GotsmanYFNS16
+
+
+----------------------- REVIEW 5 ---------------------
+PAPER: 6
+TITLE: Data-centric Consistency Policies: A Programming Model for Distributed Applications with Tunable Consistency
+AUTHORS: Nosheen Zaza and Nathaniel Nystrom
+
+OVERALL EVALUATION: 1 (weak accept)
+
+----------- OVERALL EVALUATION -----------
+The key idea of the authors is that consistency policies should be associated with data or data regions, not with operations. They propose to explain a programming model that supports such data-centric consistency specifications, and to illustrate the benefits of this model using examples and their implementation.
+
+I like the idea of the paper. It would be interesting to see how this idea affects programming. As the authors said, one way to do this is to study the relationship between data-centric consistency policies and intended datatype invariants. Another interesting direction would be to look at more consistency policies, such as causal consistency.
+
