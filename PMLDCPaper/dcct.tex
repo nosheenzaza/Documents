@@ -168,7 +168,8 @@ an example in a prototype language implementing this model\footnote{This
   \url{https://github.com/amanjpro/languages-a-la-carte/}.}.
 In Section~\ref{sec:conclusion} we conclude.
 
-
+% Changes: I mentioned at the end that we need a static type checker to enforce
+% our rules, and we need whole program analysis for that too.
 \section{Abstract System Model}
 \label{sec:model}
 Our system model allows developers to split the domain of stored objects into a
@@ -208,8 +209,13 @@ request reading at a lower consistency level. In this case, however, we do not a
 upward writes of data derived from low
 consistency reads to regions with a higher consistency level. An implementation may choose to
 allow explicit promotion of low-consistency data to be written into higher
-consistency regions to increase the flexibility of the model.
-
+consistency regions to increase the flexibility of the model. A framework that
+supports this model enforces its rules through static type checking, to ensure
+no upward writes exist, and no data items stores in regions escape actions,
+which is necessary to ensure the correctness of the system, as explained
+in[cloud types],
+which proposes a similar system. {@nate actually going back to that, I forgot 
+why this was necessary}
 %nesting of sets
 %weaker containing stronger = ok
 %stronger containing weaker = not ok
@@ -340,7 +346,10 @@ futures can be integrated
 nicely into our language. 
 
 \section{Related Work}
-\section{Conclusions, Current and Future Work}
+Catogories are data-centric approaches, tools and theories to reason about
+multiple consistency policies, and classifying consistency required to satisfy
+invariants, most works mentioned here fall under more than one category.
+% Vaziri's atomic sets
 Our approach is mainly inspired by Vaziri el al[]. In their work, the memory is
 split to regions to which accesses must be serial and regions with no access
 control, the main idea is that for regions that require serializability, all
@@ -349,18 +358,30 @@ execution paths interacting with such a region, instead, they allow the
 programmer to declare an atomic region, and the compiler then inserts
 synchronization codes on all units of work interacting. 
 We extend their approach to allow declaring multiple consistency
+
+% Kraska's consistency rationing
 policies, not only linearizabiity. Kraska et. al have proposed a data-centric
 approach supporting multiple consistency levels, and their notion of transaction
-is similar to our notion of actions, however, they assume that the
-underlying store is at least causal, hence do not support weaker consistency
-models, they also allow some data regions to have adaptable consistency, and
-accept invariant violations at a monetary cost. Furthermore the invariants
-expressed at more complicated that ours, it is not possible to exrpress all
-possible real-world invariants. By specifying a consistency policy instead of an
-invariant, we can guarantee that a wider range of invariants can be expressed in
-a data centric way, hence we describe our consistency policices as (soft
-invariants (not sure if this is such a great name))Bailis el al{feral} describe
-a.... In his thesis work and a number of papers{refs}, Adya desrcibes the mixing
+is similar to our notion of actions in the sense they do not enforce a single
+isolation property, however, they assume that the
+they also allow some data regions to have adaptable consistency, and
+accept invariant violations at a monetary cost. While they aim to reduce
+monetary costs resulting from loss of consistency or delay caused by over
+synchronization, we aim to maintain the consistency level required to enforce
+certain invariants at all times.
+
+% bailis i confluence analysis 
+Bailis el al{feral} describe
+a.... In his thesis work and a number of papers{refs}, 
+
+% putting consistency back, i-offender analysis
+extension of i confluence to include invariants that require coordination as
+well. Invariants attached to data. Because invariants need to be mapped to
+consistency properties, not all invariants found in applications can be
+expressed. 
+
+% Adya's mixing theorem
+Adya desrcibes the mixing
 theorem, which desribes  transactions with multiple consistnecy
 policies must interact and behave to preseve the isolation requirements for all
 of them. The implication is that transactions running at lower isolation levels
@@ -369,9 +390,17 @@ preserve. Our approach facilitates reasoning about such systems, because data
 for which invariants must be preseved is protected by a suitable consistency
 policy, hence eliminating the risk of having transactiosn with unsuitable, it
 also gathers the reasoning in one place, instead of a combinations of policies
-spread over all operations accessing the data. Gotsman et al[] propose a proof
-rule to show that a particular choice of consistency guarantees  .Quelea also
-uses simple first order logic predicates to describe operations sequencing and
+spread over all operations accessing the data. 
+
+% Indigo: Cause I am strong enough, a proof rule relying on invariant declarations 
+Gotsman et al[] propose a proof rule to show that a particular choice of consistency guarantees for operations
+ensures the preservation of programmer-defined invariants. The system, similar
+to Karska's also guarantees at least causal consistency, the diference is that
+it focuses on effecient invariant inforcement rather than the most effective
+monetary cost. It also requires the programmer to write proof rules.
+
+% Quelea language
+Quelea also uses simple first order logic predicates to describe operations sequencing and
 visibility, this allows operations with multiple consistency levels to interact
 over the same data, even write at different consistency levels, while re require 
 all write operations to happen at a consistency level that satisfies that
@@ -379,6 +408,16 @@ invariant to be observed by the strongest operation. While their approach is
 more flexible, it requires keeping track of the entire history of operations,
 and describing the itneractions among all operations. Our approach is arguably
 simpler to express and reason about. 
+
+The main advantage of our system is simplicity and accomodating any consistency
+policy, as long as its strength is comparable to other consistency leves in the
+system. On the down side, it requires whole program analysis, and since we
+consider only low level write operations, we cannot allow semantics such as
+those in the bank example of quelea, where higher level operations can execute
+at different consistency levels.
+
+\section{Conclusions, Current and Future Work}
+
 \label{sec:conclusion}
 We have presented here a model that supports only disjoint regions. We plan to
 extend the model with support 
