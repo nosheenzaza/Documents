@@ -213,8 +213,8 @@ consistency regions to increase the flexibility of the model. A framework that
 supports this model enforces its rules through static type checking, to ensure
 no upward writes exist, and no data items stores in regions escape actions,
 which is necessary to ensure the correctness of the system, as explained
-in[cloud types],
-which proposes a similar system. {@nate actually going back to that, I forgot 
+in~\cite{burckhardt2012cloud}, which proposes a similar system that separates
+local types from replicated, distributed types. {@nate actually going back to that, I forgot 
 why this was necessary}
 %nesting of sets
 %weaker containing stronger = ok
@@ -242,7 +242,8 @@ why this was necessary}
 % Changes here: clarify the status of the application.
 \section{Sample Implementation and Example}
 \label{sec:example}
-We now describe a subset of a proof of concept implementation we are currently working on.
+We now describe a subset of a proof of concept implementation we are currently
+working on, codenamed \emph{dcct} language.
 The objects in our system are integers or strings,
 represented as replicated registers with last-writer-wins
 semantics~\cite{burckhardt2014replicated}. At any point in time, different
@@ -252,7 +253,10 @@ is assigned a timestamp as well as other metadata that might be needed to
 enforce a consistency property. We define a partial order of three consistency properties, eventual
 consistency (\texttt{EC}) $\prec$ monotonic atomic view (\texttt{MAV})~\cite{bailis2013highly}  $\prec$
 serializability (\texttt{SR}), which apply on the action level.\footnote{The programming language Quelea~\cite{sivaramakrishnan2015declarative} provides similar
-consistency levels, as well as a proof of order validity} 
+consistency levels, as well as a proof of order validity. In short, consistency
+properties are represented as first-order logic predicates, a weaker consistency
+model is described with less logic predicates than a stronger model, and allows
+more permutations of concurrent operations.} 
 All objects in our implementation are at least eventually consistent by default, which means it
 is possible to freely observe any versions (without monotonicity guarantee), and
 eventually all versions converge. A region annotated \texttt{MAV} guarantees all new versions written by an
@@ -303,7 +307,7 @@ action orderMysteryProduct(
   }
 }
 \end{lstlisting}
-\caption{Example program with data-centric consistency policies}
+\caption{Example program in dcct language with data-centric consistency policies}
 \label{fig:example}
 \end{figure}
 
@@ -346,91 +350,89 @@ futures can be integrated
 nicely into our language. 
 
 \section{Related Work}
-Catogories are data-centric approaches, tools and theories to reason about
-multiple consistency policies, and classifying consistency required to satisfy
-invariants, most works mentioned here fall under more than one category.
-% Vaziri's atomic sets
-Our approach is mainly inspired by Vaziri el al[]. In their work, the memory is
-split to regions to which accesses must be serial and regions with no access
-control, the main idea is that for regions that require serializability, all
-modifications must be serial, and hence the programmer must serialize all
-execution paths interacting with such a region, instead, they allow the
-programmer to declare an atomic region, and the compiler then inserts
-synchronization codes on all units of work interacting. 
-We extend their approach to allow declaring multiple consistency
 
+ % Vaziri's atomic sets
+Our approach is mainly inspired by Vaziri et al.~\cite{dolby2012data}. In their work, 
+the Java language is extended with constructs that allow programmers to declare
+\emph{atomic sets} that contain places in memory for which operations must be
+serialized. An extended compiler then inserts synchronization primitives for all
+operations interacting with such sets to ensure linearizability over contained
+data. Our model generalizes this idea, to allow attaching consistency
+properties other than linearizability to sets/regions.
 % Kraska's consistency rationing
-policies, not only linearizabiity. Kraska et. al have proposed a data-centric
-approach supporting multiple consistency levels, and their notion of transaction
-is similar to our notion of actions in the sense they do not enforce a single
-isolation property, however, they assume that the
-they also allow some data regions to have adaptable consistency, and
-accept invariant violations at a monetary cost. While they aim to reduce
-monetary costs resulting from loss of consistency or delay caused by over
-synchronization, we aim to maintain the consistency level required to enforce
-certain invariants at all times.
+Kraska et al.~\cite{kraska2009consistency} have also proposed a data-centric
+approach supporting multiple consistency levels. Other than supporting
+serializability and eventual consistency, they allow some data to have adaptable consistency, and
+accept invariant violations at a monetary cost. While their aim is to reduce
+such costs, ours is to maintain the consistency level required to enforce
+certain invariants at all times, hence simplifying reasoning about the application
+correctness. Another related line of work explores the relationship between
+application correctness invariants and consistency levels required to enforce them.
+% bailis I-confluence analysis 
+Bailis el al.~\cite{bailis2014coordination} propose a criteria they call
+\emph{I-confluence}, to determine whether enforcing certain invariants require distributed
+coordination. Invariants that are I-confluent can be satisfied without strong
+consistency. 
+% Indigo putting consistency back, i-offender analysis
+An extension of I-confluence is proposed by Balegas et
+al.~\cite{balegas2015putting}, and they propose a framework that allows declaring
+correctness invariants over data. However,the weakest supported consistency
+model is causal consistency, and not all types of invariants can be
+expressed.
+% Cause I am strong enough, a proof rule relying on invariant declarations 
+Gotsman et al.~\cite{gotsman2016cause} propose a proof rule to show that a 
+particular choice of consistency guarantees for operations
+ensures the preservation of programmer-defined application invariants. Like
+Balegas aforementioned work, causal consistency is the lowest supported model.
+% Quelea language
+The Quelea programming language~\cite{sivaramakrishnan2015declarative} allows
+programmers to annotate operations with their required consistency requirements
+in the form of first-order logic predicates, that describe fine-grained consistency
+requirements. Then an SMT solver maps these requirements to the actual
+consistency levels provided by the underlying system. Quelea's contracts are
+lower-level than Gostman's, and do not ensure that the underlying integrity
+invariants are maintained. Quelea's model reasons about higher-level
+operations (e.g. deposit, withdraw), as opposed to our approach where we reason 
+only about reads and writes. Hence, it is possible in Quelea for operations with
+multiple consistency levels to interact with the same data, while we require all 
+operations to follow the exact consistency policy declared on data. While their 
+approach is more flexible in this sense, it requires keeling track of the entire
+history of operations, and describing all ordering and visibility properties among 
+operations accessing the same data.
 
-% bailis i confluence analysis 
-Bailis el al{feral} describe
-a.... In his thesis work and a number of papers{refs}, 
-
-% putting consistency back, i-offender analysis
-extension of i confluence to include invariants that require coordination as
-well. Invariants attached to data. Because invariants need to be mapped to
-consistency properties, not all invariants found in applications can be
-expressed. 
 
 % Adya's mixing theorem
-Adya desrcibes the mixing
-theorem, which desribes  transactions with multiple consistnecy
-policies must interact and behave to preseve the isolation requirements for all
-of them. The implication is that transactions running at lower isolation levels
-must "know what they are doing", in terms of application invariants they must
-preserve. Our approach facilitates reasoning about such systems, because data
-for which invariants must be preseved is protected by a suitable consistency
-policy, hence eliminating the risk of having transactiosn with unsuitable, it
-also gathers the reasoning in one place, instead of a combinations of policies
-spread over all operations accessing the data. 
+%Adya desrcibes the mixing
+%theorem, which desribes  transactions with multiple consistnecy
+%policies must interact and behave to preseve the isolation requirements for all
+%of them. The implication is that transactions running at lower isolation levels
+%must "know what they are doing", in terms of application invariants they must
+%preserve. Our approach facilitates reasoning about such systems, because data
+%for which invariants must be preseved is protected by a suitable consistency
+%policy, hence eliminating the risk of having transactiosn with unsuitable, it
+%also gathers the reasoning in one place, instead of a combinations of policies
+%spread over all operations accessing the data. 
 
-% Indigo: Cause I am strong enough, a proof rule relying on invariant declarations 
-Gotsman et al[] propose a proof rule to show that a particular choice of consistency guarantees for operations
-ensures the preservation of programmer-defined invariants. The system, similar
-to Karska's also guarantees at least causal consistency, the diference is that
-it focuses on effecient invariant inforcement rather than the most effective
-monetary cost. It also requires the programmer to write proof rules.
 
-% Quelea language
-Quelea also uses simple first order logic predicates to describe operations sequencing and
-visibility, this allows operations with multiple consistency levels to interact
-over the same data, even write at different consistency levels, while re require 
-all write operations to happen at a consistency level that satisfies that
-invariant to be observed by the strongest operation. While their approach is
-more flexible, it requires keeping track of the entire history of operations,
-and describing the itneractions among all operations. Our approach is arguably
-simpler to express and reason about. 
-
-The main advantage of our system is simplicity and accomodating any consistency
-policy, as long as its strength is comparable to other consistency leves in the
-system. On the down side, it requires whole program analysis, and since we
-consider only low level write operations, we cannot allow semantics such as
-those in the bank example of quelea, where higher level operations can execute
-at different consistency levels.
+The main advantage of our system, compared to other proposals is its simplicity,
+in terms of usage and description, and its ability to accommodate any consistency
+properties that are a partial order. On the down side, it requires whole program analysis,
+and does not attempt to prove that underlying invariants will be maintained. We
+picture that it is possible to combine our model with other related work we
+mentioned that handle this aspect.
 
 \section{Conclusions, Current and Future Work}
-
 \label{sec:conclusion}
 We have presented here a model that supports only disjoint regions. We plan to
-extend the model with support 
-for 
-nesting and merging of regions in the spirit of~\cite{dolby2012data}.
-Temporarily merging regions is useful for
-avoid higher-level data races~\cite{artho2003high}. We are
-currently developing a programming language and runtime with support for this extended model
-on top of cloud types~\cite{burckhardt2012cloud}. Furthermore, there are systems
-that allow declaring invariants directly on data~\cite{bailis2015feral}, instead of 
+extend the model with support for nesting and merging of regions in the spirit of~\cite{dolby2012data}.
+Temporarily merging regions is useful to avoid higher-level data races~\cite{artho2003high}. We are
+currently developing a programming language (dcct: Data Centric Cloud Types) and runtime with 
+support for this extended model on top of cloud types~\cite{burckhardt2012cloud}. Furthermore, 
+there are systems that allow declaring invariants directly on data~\cite{bailis2015feral}, instead of 
 consistency levels enforcing them as we do. We plan to survey commonly used
 invariants in data-backed applications to support declaring them directly, which
 is easier and more readable.
+
 %\appendix
 
 %\acks
