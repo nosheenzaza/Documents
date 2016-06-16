@@ -249,7 +249,7 @@ represented as replicated registers with last-writer-wins
 semantics~\cite{burckhardt2014replicated}. At any point in time, different
 versions of each entity may
 co-exist, either on different replicas or in local client buffers. Each version
-is assigned a timestamp as well as other metadata that might be needed to
+is assigned a time stamp as well as other metadata that might be needed to
 enforce a consistency property. We define a partial order of three consistency properties, eventual
 consistency (\texttt{EC}) $\prec$ monotonic atomic view (\texttt{MAV})~\cite{bailis2013highly}  $\prec$
 serializability (\texttt{SR}), which apply on the action level.\footnote{The programming language Quelea~\cite{sivaramakrishnan2015declarative} provides similar
@@ -344,10 +344,40 @@ transactionally (e.g., read and write locks are acquired on \texttt{amount} unti
 action success is signaled), and also stores operation logs in an eventually consistent,
 key-value store. Actions provide the additional property of signaling success
 of failure, and developers have to handle them appropriately. For brevity, we
-omit failure handling details here, however, a model such as{the transactions
-  with futures Nate showed me? cannot find it}, which combines transactions with
-futures can be integrated
-nicely into our language. 
+omit failure handling details here, the interested reader can refer to(@nate I
+could not find a very specific reference, any suggestions?)
+
+\section{Underlying System Features}
+The underlying storage system needed to support annotated regions and actions should
+support at least the strongest consistency level, and ideally all consistency
+levels described in the language, with equivalent guarantees or stronger
+guarantees. For the particular
+implementation described here, we use a customized
+version of Kaiju~\cite{kaiju}, which is a prototype key-value store implemented to
+evaluate~\cite{bailis2014scalable}. For our purpose, it provides long read and
+write locks. Each lock associated with a region touched by an action is acquired
+at when the action starts, and released upon success, upon failure, it is
+released after restoring the previous database state. As for \texttt{MAV}
+regions touched by an action, Kaiju provides
+\texttt{get\_all} and \texttt{put\_all} functions, which execute a ramp algorithm
+to fetch related values in a way consistent with our \texttt{MAV} consistency
+definition. As described in ~\cite{bailis2014scalable} concerning implementing
+read-write transactions, at the beginning of each action, a call to
+\texttt{get\_all} is issued per \texttt{MAV} annotated region, the data fetched
+is placed in a local cache. Each subsequent write to such regions is issued
+against the local cache, at the end of transaction, upon commit, a
+\texttt{put\_all} call
+is issued for every region with the values form the cache. As for \texttt{EC}
+regions they are read and written directly using the baseline protocol, which
+provides to concurrency control. If any store-related operation fails, the
+entire action is marked failed, in which case the store needs to be restored as
+needed to satisfy the consistency policy of each region, in addition to rolling
+back any changes made by uncommitted actions. A compiler is needed to translate
+actions as described to a Java program containing Kaiju calls. The generated code can be made more 
+efficient. For instance, specialized program analysis can deduce that serial 
+region guarantees can be  satisfied with short read or write locks. Our aim here
+was to show the feasibility of implementing actions enforcing multiple
+consistency properties. 
 
 \section{Related Work}
 
@@ -432,7 +462,6 @@ there are systems that allow declaring invariants directly on data~\cite{bailis2
 consistency levels enforcing them as we do. We plan to survey commonly used
 invariants in data-backed applications to support declaring them directly, which
 is easier and more readable.
-
 %\appendix
 
 %\acks
