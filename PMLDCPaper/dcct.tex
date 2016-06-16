@@ -133,9 +133,11 @@ supports this property, then specifies the consistency level per
 operation or per
 sequence of operations. However, mapping high-level application consistency requirements to a combination of
 low-level consistency settings on operations is often tedious and error-prone.
-For instance,
-Cassandra~\cite{lakshman2010cassandra} and Riak~\cite{riak} allow specifying one of many
-consistency levels:
+% Low priority: the for the first problem, we really do not do much 
+% to solve it, I should really say that achieveing consistency with operations
+% opererating at different consistency levels is not straight forward.
+For instance, Cassandra~\cite{lakshman2010cassandra} and Riak~\cite{riak} allow 
+specifying one of many consistency levels:
 \texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}, etc., describing
 the set of nodes that need to
 acknowledge the success of an operation. It
@@ -143,7 +145,8 @@ is not immediately clear how consistency levels such as causal consistency or
 linearizability can be achieved, if at all, using these systems. The Cassandra documentation
 states that,
 to achieve ``strong consistency''\footnote{Strong consistency here implies
-neither linearizability or serializability, as explained in~\cite{sivaramakrishnan2016representation}.} clients must issue quorum reads and writes,
+neither linearizability or serializability, as explained 
+in~\cite{sivaramakrishnan2016representation}.} clients must issue quorum reads and writes,
 however, nothing prevents a misbehaving client from issuing concurrent \texttt{one} writes and
 \texttt{quorum} reads on the same data, thus violating strong consistency for other clients. Another
 problem is when a client issues \texttt{all} reads and writes, which is completely
@@ -151,9 +154,6 @@ unnecessary for enforcing any high-level consistency policies. Similar issues
 occur in relational database systems, where it cannot be guaranteed that a
 sequence of transactions running at different isolation levels preserves the intended
 invariants~\cite{gray1992transaction}. 
-
-% TODO: above is a bit of a jumble. Need to define what is meant by
-% consistency. Cassandra examples are a bit unclear.
 
 % TODO the solution is not only for safety, but also for expressiveness. 
 To tackle such problems, we propose a data-centric, declarative programming
@@ -280,12 +280,12 @@ object mysteryProduct {
   @EC price: Int
   @SR amount: Int
 }
-@EC class orderLog {
-  username: String
-  country: String
-  date: String
-  amount: Int
-  orderSucceeded: Int
+class orderLog {
+  @EC username: String
+  @EC country: String
+  @EC date: String
+  @EC amount: Int
+  @EC orderSucceeded: Int
 }
 action orderMysteryProduct(
  customer: Customer, amount: Int) {
@@ -326,7 +326,7 @@ it and eventually all replicas of this information will converge.
 Payment information is declared \texttt{MAV}, to avoid showing a mixed state of payment info, this still
 imposes the problem of using an older payment method when charging the customer,
 however, the developer is willing to accept this anomaly for the sake of
-availability. \texttt{amount} is \texttt{sc} to ensure that all operations
+availability. \texttt{mysteryProduct.amount} is \texttt{SR} to ensure that all operations
 observe the latest version and avoid selling non-existent items. While it is possible to request a read at a lower
 level, our model ensures that we cannot write back an amount based on such reads. For brevity,
 we show only one action \texttt{orderMysteryProduct}. This action does
@@ -334,7 +334,7 @@ not have a single isolation level, as is the case in regular transactions;
 rather, the action manipulates data with many different consistency levels.
 However, we can see the flexibility and safety this approach gives the
 developer. It is possible to read and write at multiple consistency levels
-seamlessly, and it is correct according to consistency region specifications.
+seamlessly while preserving  consistency requirements for each region.
 
 Actions in our system can be compared to generic functions interacting
 with different data stores that enforce varying consistency guarantees.
@@ -348,11 +348,11 @@ omit failure handling details here, the interested reader can refer to(@nate I
 could not find a very specific reference, any suggestions?)
 
 \section{Underlying System Features}
+\label{sec:underlyingsys}
 The underlying storage system needed to support annotated regions and actions should
 support at least the strongest consistency level, and ideally all consistency
-levels described in the language, with equivalent guarantees or stronger
-guarantees. For the particular
-implementation described here, we use a customized
+levels described in the language, with equivalent or stronger
+guarantees. For the particular implementation described here, we use a customized
 version of Kaiju~\cite{kaiju}, which is a prototype key-value store implemented to
 evaluate~\cite{bailis2014scalable}. For our purpose, it provides long read and
 write locks. Each lock associated with a region touched by an action is acquired
@@ -380,7 +380,7 @@ was to show the feasibility of implementing actions enforcing multiple
 consistency properties. 
 
 \section{Related Work}
-
+\label{sec:relatedwork}
  % Vaziri's atomic sets
 Our approach is mainly inspired by Vaziri et al.~\cite{dolby2012data}. In their work, 
 the Java language is extended with constructs that allow programmers to declare
@@ -396,7 +396,10 @@ serializability and eventual consistency, they allow some data to have adaptable
 accept invariant violations at a monetary cost. While their aim is to reduce
 such costs, ours is to maintain the consistency level required to enforce
 certain invariants at all times, hence simplifying reasoning about the application
-correctness. Another related line of work explores the relationship between
+correctness. Furthermore, their transactions are not restricted from updating
+data with certain consistency attached at a lower consistency level, which gives
+rise to anomalies, because they do not propose a static checker. 
+Another related line of work explores the relationship between
 application correctness invariants and consistency levels required to enforce them.
 % bailis I-confluence analysis 
 Bailis el al.~\cite{bailis2014coordination} propose a criteria they call
@@ -444,12 +447,16 @@ operations accessing the same data.
 %spread over all operations accessing the data. 
 
 
-The main advantage of our system, compared to other proposals is its simplicity,
-in terms of usage and description, and its ability to accommodate any consistency
-properties that are a partial order. On the down side, it requires whole program analysis,
-and does not attempt to prove that underlying invariants will be maintained. We
-picture that it is possible to combine our model with other related work we
-mentioned that handle this aspect.
+The main advantage of our approach, compared to other proposals, is its simplicity,
+in terms of usage and description, and its ability to accommodate any
+non-probabilistic consistency properties that form a partial order. On the down side, 
+it requires whole program analysis, and does not attempt to prove that underlying 
+invariants will be maintained, putting it at the hands of the developer to decide 
+on the suitable consistency policy needed for each region. We believe that it is 
+possible to combine our work with ~\cite{gotsman2016cause}
+and ~\cite{balegas2015putting}, to show that developers selection of consistency
+policies maintains underlying application invariants
+
 
 \section{Conclusions, Current and Future Work}
 \label{sec:conclusion}
@@ -457,14 +464,14 @@ We have presented here a model that supports only disjoint regions. We plan to
 extend the model with support for nesting and merging of regions in the spirit of~\cite{dolby2012data}.
 Temporarily merging regions is useful to avoid higher-level data races~\cite{artho2003high}. We are
 currently developing a programming language (dcct: Data Centric Cloud Types) and runtime with 
-support for this extended model on top of cloud types~\cite{burckhardt2012cloud}. Furthermore, 
-there are systems that allow declaring invariants directly on data~\cite{bailis2015feral}, instead of 
-consistency levels enforcing them as we do. We plan to survey commonly used
-invariants in data-backed applications to support declaring them directly, which
-is easier and more readable.
+support for this extended model on top of cloud
+types~\cite{burckhardt2012cloud}.
+
 %\appendix
 
-%\acks
+\acks We would like to thank prof. Fernando Pedone and his research group
+members for very helpful discussions and useful pointers. We would also like to
+thank our reviewers for their invaluable feedback.
 
 %cknowledgments, if needed.
 
