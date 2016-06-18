@@ -221,14 +221,14 @@ invariants, it should be used as the annotation on the data region itself.
 These data-centric write restrictions act as data region guards, because they force all writes to go
 though the needed consistency protocol.
 
-{@nz which framework? ours?}
+\todo{@nz which framework? ours?}
 A framework that
 supports this model enforces its rules through static type checking, to ensure
 no upward writes exist, and no data items stores in regions escape actions,
 which is necessary to ensure the correctness of the system, as explained
 in~\cite{burckhardt2012cloud}, which proposes a similar system that separates
 local types from replicated, distributed types.
-{@nate actually going back to that, I forgot why this was necessary}
+\todo{@nate actually going back to that, I forgot why this was necessary}
 
 %nesting of sets
 %weaker containing stronger = ok
@@ -254,26 +254,31 @@ local types from replicated, distributed types.
 % extend with sameregion predicates (cf. sameobject)
 
 % Changes here: clarify the status of the application.
-\section{Sample Implementation and Example}
+\section{Data-centric cloud types}
 \label{sec:example}
-We now describe a subset of a proof of concept implementation we are currently
-working on, codenamed \emph{dcct} language.
-The objects in our system are integers or strings,
+In this section, we present a 
+proof-of-concept implementation of the model based on \emph{cloud
+types}~\cite{burckhardt2012cloud}. In our language, \emph{DCCT} (Data-Centric
+Cloud Types), objects are integers or strings,
 represented as replicated registers with last-writer-wins
 semantics~\cite{burckhardt2014replicated}. At any point in time, different
 versions of each entity may
 co-exist, either on different replicas or in local client buffers. Each version
 is assigned a time stamp as well as other metadata that might be needed to
-enforce a consistency property. We define a partial order of three consistency properties, eventual
+enforce a consistency property.
+
+We define a partial order of three consistency levels, eventual
 consistency (\texttt{EC}) $\prec$ monotonic atomic view (\texttt{MAV})~\cite{bailis2013highly}  $\prec$
-serializability (\texttt{SR}), which apply on the action level.\footnote{The programming language Quelea~\cite{sivaramakrishnan2015declarative} provides similar
+serializability (\texttt{SR}), which apply on the action level. The programming language Quelea~\cite{sivaramakrishnan2015declarative} provides similar
 consistency levels, as well as a proof of order validity. In short, consistency
-properties are represented as first-order logic predicates, a weaker consistency
-model is described with less logic predicates than a stronger model, and allows
-more permutations of concurrent operations.} 
-All objects in our implementation are at least eventually consistent by default, which means it
-is possible to freely observe any versions (without monotonicity guarantee), and
-eventually all versions converge. A region annotated \texttt{MAV} guarantees all new versions written by an
+levels are represented as first-order logical predicates; ordering is given
+by entailment: stronger consistency levels entail weaker.
+All variables in our implementation are at least eventually consistent
+\texttt{EC}, which means it
+is possible to freely observe any version of the object (without monotonicity
+guarantees), and
+eventually all versions will converge. A region annotated \texttt{MAV}
+guarantees that all new versions written by an
 action are observed together, and that version updates are observed
 monotonically. The \texttt{SR} annotation on a
 region guarantees that the latest version of all
@@ -329,69 +334,86 @@ Figure~\ref{fig:example} shows a simple schema with annotated
 regions and actions. Regions are annotated 
 with their consistency level. For simplicity, regions are simply fields,
 which may be records containing multiple simple fields.
-In this example, the developer decided that \texttt{username}s must be 
-unique, hence serializability is needed
-when allocating them. It is still possible to read usernames at lower
+%
+In this example, the developer requires that \texttt{username}s be 
+unique, hence they are declared as serializable.
+It is still possible to read \texttt{username}s at lower
 consistency levels if needed (e.g., if we only need to display the name). 
 \texttt{name} and \texttt{gender} are not very important, even if older
 data is shown or intermediate data is written, the customer can still correct
 it and eventually all replicas of this information will converge.
 \texttt{address} is strongly consistency to avoid shipping to an old address.
-Payment information is declared \texttt{MAV}, to avoid showing a mixed state of payment info, this still
-imposes the problem of using an older payment method when charging the customer,
+Payment information is declared \texttt{MAV}, to avoid showing a mixed state
+of payment info. Using \texttt{MAV} consistency
+allows an older payment method to be used when charging the customer,
 however, the developer is willing to accept this anomaly for the sake of
 availability. \texttt{mysteryProduct.amount} is \texttt{SR} to ensure that all operations
 observe the latest version and avoid selling non-existent items. While it is possible to request a read at a lower
-level, our model ensures that we cannot write back an amount based on such reads. For brevity,
-we show only one action \texttt{orderMysteryProduct}. This action does
+level, our model ensures that we cannot write back an amount based on such reads.
+%
+We show only one action \texttt{orderMysteryProduct}. This action does
 not have a single isolation level, as is the case in regular transactions;
 rather, the action manipulates data with many different consistency levels.
 However, we can see the flexibility and safety this approach gives the
 developer. It is possible to read and write at multiple consistency levels
-seamlessly while preserving  consistency requirements for each region.
+seamlessly while preserving the consistency requirements of each region.
 
 Actions in our system can be compared to generic functions interacting
 with different data stores that enforce varying consistency guarantees.
 \texttt{orderMysteryProduct} can be seen as a function that
-reads and updates \texttt{amount} stored in a relational database
-transactionally (e.g., read and write locks are acquired on \texttt{amount} until
-action success is signaled), and also stores operation logs in an eventually consistent,
-key-value store. Actions provide the additional property of signaling success
-of failure, and developers have to handle them appropriately. For brevity, we
-omit failure handling details here, the interested reader can refer to(@nate I
-could not find a very specific reference, any suggestions?)
+reads and updates \texttt{mysteryProduct.amount}, stored in a
+serializable relational database, and also stores operation logs in an eventually consistent,
+key-value store. In addition, actions can signal success
+or failure, and developers have to handle them appropriately. For brevity, we
+omit failure handling details here, the interested reader can refer to
+\cite{??}.~\todo{@nate I
+could not find a very specific reference, any suggestions?}
 
 \section{Underlying System Features}
 \label{sec:underlyingsys}
-The underlying storage system needed to support annotated regions and actions should
+The underlying storage system needed to support annotated regions and actions must
 support at least the strongest consistency level, and ideally all consistency
-levels described in the language, with equivalent or stronger
-guarantees. For the particular implementation described here, we use a customized
-version of Kaiju~\cite{kaiju}, which is a prototype key-value store implemented to
-evaluate~\cite{bailis2014scalable}. For our purpose, it provides long read and
-write locks. Each lock associated with a region touched by an action is acquired
-at when the action starts, and released upon success, upon failure, it is
-released after restoring the previous database state. As for \texttt{MAV}
-regions touched by an action, Kaiju provides
-\texttt{get\_all} and \texttt{put\_all} functions, which execute a ramp algorithm
+levels specifiable in the language, with equivalent or stronger
+guarantees. For the implementation described here, we use a customized
+version of Kaiju~\cite{kaiju}, a prototype key-value store implemented to
+evaluate~\cite{bailis2014scalable}. For our purposes, it provides long read and
+write locks. We associate a lock with each region. The relevant locks are acquired when an
+action starts and released upon success. On failure, locks are
+released after restoring the previous database state.
+
+To implement \texttt{SR} regions, \todo{describe}.
+
+To implement \texttt{MAV}
+regions, Kaiju provides
+\texttt{get\_all} and \texttt{put\_all} functions, which execute a
+RAMP~\cite{??}
+algorithm
 to fetch related values in a way consistent with our \texttt{MAV} consistency
-definition. As described in ~\cite{bailis2014scalable} concerning implementing
-read-write transactions, at the beginning of each action, a call to
-\texttt{get\_all} is issued per \texttt{MAV} annotated region, the data fetched
-is placed in a local cache. Each subsequent write to such regions is issued
-against the local cache, at the end of transaction, upon commit, a
+definition. As described in \cite{bailis2014scalable}, at the beginning of
+each action, a call to
+\texttt{get\_all} is issued for each \texttt{MAV} annotated region.
+The data fetched
+is placed in a local cache. Subsequent writes in the action are performed on
+the local cache. When the action completes successfully, a
 \texttt{put\_all} call
-is issued for every region with the values form the cache. As for \texttt{EC}
-regions they are read and written directly using the baseline protocol, which
-provides to concurrency control. If any store-related operation fails, the
+is issued on dirty regions to write them back to the server.
+
+\texttt{EC}
+regions are read and written directly using the baseline protocol, which
+provides no concurrency control. If any write operation fails, the
 entire action is marked failed, in which case the store needs to be restored as
 needed to satisfy the consistency policy of each region, in addition to rolling
-back any changes made by uncommitted actions. A compiler is needed to translate
-actions as described to a Java program containing Kaiju calls. The generated code can be made more 
-efficient. For instance, specialized program analysis can deduce that serial 
-region guarantees can be  satisfied with short read or write locks. Our aim here
+back any changes made by uncommitted actions.
+\todo{@nz A bit unclear.}
+
+The prototype dcct compiler translates
+actions to a Java methods containing Kaiju calls.
+The generated code can be made more 
+efficient. For instance, specialized program analysis can deduce that
+\texttt{SR} 
+region guarantees can be satisfied with short read or write locks. Our aim here
 was to show the feasibility of implementing actions enforcing multiple
-consistency properties. 
+consistency properties.
 
 \section{Related Work}
 \label{sec:relatedwork}
