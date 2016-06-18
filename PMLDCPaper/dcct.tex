@@ -421,21 +421,23 @@ consistency properties.
 Our approach is mainly inspired by Vaziri et al.~\cite{dolby2012data}. In their work, 
 the Java language is extended with constructs that allow programmers to declare
 \emph{atomic sets} that contain places in memory for which operations must be
-serialized. An extended compiler then inserts synchronization primitives for all
-operations interacting with such sets to ensure linearizability over contained
-data. Our model generalizes this idea, to allow attaching consistency
-properties other than linearizability to sets/regions.
+serialized. The compiler inserts synchronization primitives for all
+operations interacting with such sets to ensure linearizability over the
+regions accessed by the operations.
+Our model generalizes this idea, allowing consistency
+levels other than linearizability.
 % Kraska's consistency rationing
 Kraska et al.~\cite{kraska2009consistency} have also proposed a data-centric
-approach supporting multiple consistency levels. Other than supporting
-serializability and eventual consistency, they allow some data to have adaptable consistency, and
-accept invariant violations at a monetary cost. While their aim is to reduce
+approach supporting multiple consistency levels. Besides 
+serializability and eventual consistency, they also allow some data to have adaptable consistency and
+accept invariant violations with some cost. While their aim is to reduce
 such costs, ours is to maintain the consistency level required to enforce
-certain invariants at all times, hence simplifying reasoning about the application
+certain invariants at all times, therefore simplifying reasoning about 
+application
 correctness. Furthermore, their transactions are not restricted from updating
-data with certain consistency attached at a lower consistency level, which gives
-rise to anomalies, because they do not propose a static checker. 
-Another related line of work explores the relationship between
+data at lower consistency levels, which gives rise to anomalies.
+
+Another line of work explores the relationship between
 application correctness invariants and consistency levels required to enforce them.
 % bailis I-confluence analysis 
 Bailis el al.~\cite{bailis2014coordination} propose a criteria they call
@@ -444,31 +446,34 @@ coordination. Invariants that are I-confluent can be satisfied without strong
 consistency. 
 % Indigo putting consistency back, i-offender analysis
 An extension of I-confluence is proposed by Balegas et
-al.~\cite{balegas2015putting}, and they propose a framework that allows declaring
-correctness invariants over data. However,the weakest supported consistency
+al.~\cite{balegas2015putting}, who propose a framework that allows declaring
+correctness invariants over data. However, the weakest supported consistency
 model is causal consistency, and not all types of invariants can be
 expressed.
 % Cause I am strong enough, a proof rule relying on invariant declarations 
-Gotsman et al.~\cite{gotsman2016cause} propose a proof rule to show that a 
+Gotsman et al.~\cite{gotsman2016cause} propose a proof rule
+\todo{[@nz just a rule?]} to show that a 
 particular choice of consistency guarantees for operations
-ensures the preservation of programmer-defined application invariants. Like
-Balegas aforementioned work, causal consistency is the lowest supported model.
+ensures the preservation of programmer-defined application invariants. As in
+Balegas et al.~\cite{balegas2015putting}, causal consistency is the lowest supported model.
 % Quelea language
+
 The Quelea programming language~\cite{sivaramakrishnan2015declarative} allows
-programmers to annotate operations with their required consistency requirements
-in the form of first-order logic predicates, that describe fine-grained consistency
-requirements. Then an SMT solver maps these requirements to the actual
+programmers to annotate operations with their consistency requirements
+in the form of first-order logical predicates.
+An SMT solver maps these requirements to the actual
 consistency levels provided by the underlying system. Quelea's contracts are
 lower-level than Gostman's, and do not ensure that the underlying integrity
 invariants are maintained. Quelea's model reasons about higher-level
 operations (e.g. deposit, withdraw), as opposed to our approach where we reason 
 only about reads and writes. Hence, it is possible in Quelea for operations with
-multiple consistency levels to interact with the same data, while we require all 
-operations to follow the exact consistency policy declared on data. While their 
-approach is more flexible in this sense, it requires keeling track of the entire
+multiple consistency levels to interact with the same data, while we require 
+operations to follow the consistency policy declared on data. While their 
+approach is more flexible in this sense, it requires keeping track of the entire
 history of operations, and describing all ordering and visibility properties among 
 operations accessing the same data.
 
+\todo{Adya}
 
 % Adya's mixing theorem
 %Adya desrcibes the mixing
