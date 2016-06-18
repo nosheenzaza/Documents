@@ -187,35 +187,49 @@ read--write operations that perform a single logical task, and may interact with
 multiple regions. An action succeeds if and only if all contained operations
 succeed. The visibility of each write, and the recency of
 data observed by each read within an action, for both failed and successful
-actions is determined by the consistency policy of the region with which reads
+actions, is determined by the consistency policy of the region with which reads
 and writes interact. In this sense, actions are more flexible than relational
 database transactions, which enforce a single isolation and visibility policy for all contained
-operations. It is not possible to customize the consistency of any write operation, justified
-by the assumption that each data region is annotated with a consistency policy strong enough to enforce 
-an implied invariant; selecting a stronger
-consistency policy is not only pointless, but also can worsen
-availability or performance properties of the application. On the other hand,
-selecting a weaker consistency policy makes it impossible to prove that
-application invariants will appear satisfied for all concurrent
-operations. If a weaker policy is in fact strong enough to enforce all implied
-invariants, it should be used as an annotation on the data region itself. 
-These data-centric write restrictions act as data region guards, because they force all writes to go
-though the needed consistency protocol. For read operations, we allow controlled customization of 
-their consistency level; it is still not allowed to request reading
-at a consistency level stronger than that of the region containing the item
-being read, again because it cannot be guaranteed given our restrictions on
-write consistency levels, but it is possible to
-request reading at a lower consistency level. In this case, however, we do not allow
+operations.
+
+The framework allows controlled customization of 
+the consistency level of read operations; that is, it is allowed to request
+reads from a region at a weaker consistency level than the declared level of
+the region. It is not allowed to read
+at a consistency level stronger than that of the region
+because it cannot be enforced without also changing the consistency
+level of write operations.
+The framework does not allow
 upward writes of data derived from low
-consistency reads to regions with a higher consistency level. An implementation may choose to
+consistency reads to regions with a higher consistency level.
+%
+However, an implementation may choose to
 allow explicit promotion of low-consistency data to be written into higher
-consistency regions to increase the flexibility of the model. A framework that
+consistency regions to increase the flexibility of the model.
+
+Unlike reads, it is not possible to customize the consistency of write
+operations. This is justified
+by the assumption that each data region is annotated with a consistency policy strong enough to enforce 
+any application-specific invariants. Selecting a stronger
+consistency policy is not only pointless, but also can worsen
+the availability or performance properties of the application. On the other hand,
+selecting a weaker consistency policy makes it impossible to ensure that
+application invariants are maintained by concurrent
+operations. If a weaker policy is in fact strong enough to enforce any
+application-specific
+invariants, it should be used as the annotation on the data region itself. 
+These data-centric write restrictions act as data region guards, because they force all writes to go
+though the needed consistency protocol.
+
+{@nz which framework? ours?}
+A framework that
 supports this model enforces its rules through static type checking, to ensure
 no upward writes exist, and no data items stores in regions escape actions,
 which is necessary to ensure the correctness of the system, as explained
 in~\cite{burckhardt2012cloud}, which proposes a similar system that separates
-local types from replicated, distributed types. {@nate actually going back to that, I forgot 
-why this was necessary}
+local types from replicated, distributed types.
+{@nate actually going back to that, I forgot why this was necessary}
+
 %nesting of sets
 %weaker containing stronger = ok
 %stronger containing weaker = not ok
