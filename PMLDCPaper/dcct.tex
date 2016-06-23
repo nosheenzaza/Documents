@@ -44,10 +44,13 @@
 \setlength{\pdfpageheight}{\paperheight}
 \setlength{\pdfpagewidth}{\paperwidth}
 
+%TODO fix copyright to what I received.
+%TODO remove preprint
 \conferenceinfo{PMLDC '16}{July 17, 2016, Rome, , Italy}
 \copyrightyear{2016}
 \copyrightdata{978-1-nnnn-nnnn-n/yy/mm}
 \copyrightdoi{nnnnnnn.nnnnnnn}
+
 
 % Uncomment the publication rights you want to use.
 %\publicationrights{transferred}
@@ -88,9 +91,9 @@ correctness criteria and invariants are a property of data, not operations.
 Hence, it is reasonable to define the consistency properties
 required to enforce various data invariants on the data itself rather than on the operations. 
 The result is a system that is simpler to describe and reason about. 
-In this paper, we outline an abstract model
-for data-centric consistency specification, and demonstrate it through a simple,
-concrete programming language prototype implementation.
+In this paper, we outline an abstract model of programming language constructs
+and a static checker for data-centric consistency control, and demonstrate
+this model through a simple prototype programming language implementation.
 \end{abstract}
 
 %\category{CR-number}{subcategory}{third-level}
@@ -101,13 +104,12 @@ concrete programming language prototype implementation.
 %term1, term2
 
 \keywords
-distributed systems, eventual consistency, domain-specific programming languages
+distributed systems, eventual consistency, static analysis, domain-specific programming languages
 
 \section{Introduction}
 In modern distributed systems, data is often replicated 
 to enhance availability and resilience to failure, and to improve performance by
-placing replicas closer to clients.
-However, managing the consistency of 
+placing replicas closer to clients. However, managing the consistency of 
 replicated data is a nontrivial problem. Ideally, all clients should observe
 the most recent data at all times.
 Achieving this consistency level through
@@ -129,22 +131,17 @@ recommendations, and is widely used in practice~\cite{eventualeBay,eventualNetfl
 
 In current systems, to enforce a certain consistency
 property in an application, a developer selects a storage system that
-supports this property, then specifies the consistency level per
-operation or per
-sequence of operations. However, mapping high-level application consistency requirements to a combination of
+supports this property, then specifies consistency settings per
+operation or per sequence of operations. However, mapping high-level 
+application consistency requirements to a combination of
 low-level consistency settings on operations is often tedious and error-prone.
-% Low priority: the for the first problem, we really do not do much 
-% to solve it, I should really say that achieveing consistency with operations
-% opererating at different consistency levels is not straight forward.
 For instance, Cassandra~\cite{lakshman2010cassandra} and Riak~\cite{riak} allow 
-specifying one of many consistency levels:
+specifying one of many consistency settings for operations:
 \texttt{one}, \texttt{two}, \texttt{quorum}, \texttt{all}, etc., describing
-the set of nodes that need to
-acknowledge the success of an operation. It
+the set of nodes that need to acknowledge the success of an operation. It
 is not immediately clear how consistency levels such as causal consistency or
 linearizability can be achieved, if at all, using these systems. The Cassandra documentation
-states that,
-to achieve ``strong consistency''\footnote{Strong consistency here implies
+states that, to achieve ``strong consistency''\footnote{Strong consistency here implies
 neither linearizability or serializability, as explained 
 in~\cite{sivaramakrishnan2016representation}.} clients must issue quorum reads and writes,
 however, nothing prevents a misbehaving client from issuing concurrent \texttt{one} writes and
@@ -157,31 +154,32 @@ invariants~\cite{gray1992transaction}.
 
 % TODO the solution is not only for safety, but also for expressiveness. 
 To tackle such problems, we propose a data-centric, declarative programming
-model inspired by~\cite{dolby2012data}, where
-high-level consistency requirements are declared for data regions that share a
-consistency property, and low-level consistency settings for operations interacting with
+model inspired by~\cite{dolby2012data}, where high-level consistency
+requirements needed to enforce certain data integrity invariants 
+are declared directly over data regions, and low-level 
+consistency settings for operations interacting with
 regions are assigned or restricted accordingly. We
 describe the abstract model in Section~\ref{sec:model}, and in
-Section~\ref{sec:example} we motivate its usefulness in addressing the above issues by showing
-an example in a prototype language implementing this model\footnote{This
-  language is a work in progress. The project that can be found at
+Section~\ref{sec:example} we motivate its usefulness in addressing the above 
+issues by showing an example in a prototype language implementing it.
+\footnote{This language is a work in progress. The project that can be found at
   \url{https://github.com/amanjpro/languages-a-la-carte/}.}.
-In Section~\ref{sec:conclusion} we conclude.
+We describe the mapping between our language's data-centric declarations and 
+underlying operational consistency settings of the target storage system in 
+Section~\ref{sec:underlyingsys}.  In section~\ref{sec:relatedwork}, we overview 
+related work, and finally, in Section~\ref{sec:conclusion}, we conclude.
 
 % Changes: I mentioned at the end that we need a static type checker to enforce
 % our rules, and we need whole program analysis for that too.
 \section{Abstract System Model}
 \label{sec:model}
 Our system model allows developers to split the domain of stored objects into a
-collection of named, disjoint
-\emph{regions}. Each
-region contains objects that are related by some application-specific consistency property. The
-developer annotates each region with a consistency level 
-strong enough to enforce the implied invariants. The consistency levels form
-a partial order
-based on strength, as defined
-in~\cite{sivaramakrishnan2015declarative}.
-To interact with regions, the developer
+collection of named, disjoint \emph{regions}. Each
+region contains objects that are related by some application-specific integrity
+invariant. The developer annotates each region with a consistency level 
+strong enough to enforce the implied invariants. The consistency levels in this
+system must form a partial order based on strength, as defined
+in~\cite{sivaramakrishnan2015declarative}. To interact with regions, the developer
 declares \emph{actions}, sequences of atomic
 read--write operations that perform a single logical task, and may interact with
 multiple regions. An action succeeds if and only if all contained operations
