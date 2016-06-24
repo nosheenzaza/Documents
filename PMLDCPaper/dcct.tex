@@ -454,13 +454,13 @@ operations accessing the same data.
 
 % Adya's mixing theorem
 To reason about the correctness of systems with transactions running at different
-isolation levels, Adya~\cite{adya2000generalized} proposed the mixing
-theorem, which states that in mixing-correct histories, each transaction is provided 
+isolation levels, Adya~\cite{adya2000generalized} proposed a definition of
+\emph{mixing-correct} and proved that 
+in mixing-correct histories each transaction is provided 
 the guarantees that pertain to its level. The implication is that transactions running 
 at lower isolation levels must ``know what they are doing'', in terms of application 
 invariants they must preserve, and must update the database consistently even if they observe an
-inconsistent state. Our data-centric approach does not rely on operations
-``knowing what they doing'' and instead forces all operations interacting with data
+inconsistent state. Our data-centric approach, in contrast, requires all operations interacting with data
 for which invariants must be preserved to follow the declared consistency
 policy. 
 
@@ -468,9 +468,11 @@ policy.
 \label{sec:conclusion}
 The main advantage of our approach, compared to other proposals, is its simplicity,
 in terms of usage and description, and its ability to accommodate any
-non-probabilistic consistency properties that form a partial order. On the down side, 
-it requires whole program analysis, and does not attempt to prove that underlying 
-invariants will be maintained, putting it at the hands of the developer to decide 
+non-probabilistic consistency properties that form a partial order. On the
+other hand, it 
+does not attempt to prove that underlying 
+application invariants will be maintained,
+putting it at the hands of the developer to decide 
 on the suitable consistency policy needed for each region. We believe that it is 
 possible to combine our work with ~\cite{gotsman2016cause}
 and ~\cite{balegas2015putting}, to show that a developer's selection of consistency
