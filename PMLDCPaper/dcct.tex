@@ -176,8 +176,8 @@ related work, and finally, in Section~\ref{sec:conclusion}, we conclude.
 Our system model allows developers to split the domain of stored objects into a
 collection of named, disjoint \emph{regions}. Each
 region contains objects that are related by some application-specific integrity
-invariant. The developer annotates each region with a consistency level 
-strong enough to enforce the implied invariants. Supported consistency levels 
+invariant. The developer annotates each region with a consistency policy 
+strong enough to enforce the implied invariants. Supported consistency policies 
 must form a partial order based on strength, as defined
 in~\cite{sivaramakrishnan2015declarative}. To interact with regions, the developer
 declares \emph{actions}, sequences of atomic
@@ -190,7 +190,7 @@ and writes interact. In this sense, actions are more flexible than relational
 database transactions, which enforce a single isolation and visibility policy for all contained
 operations.
 
-This model allows controlled customization of the consistency level of read operations; 
+This model allows controlled customization of the consistency policy of read operations; 
 that is, it is allowed to request reads from a region at a weaker consistency level than the declared level of
 the region. It is not allowed to read
 at a consistency level stronger than that of the region
@@ -199,7 +199,7 @@ level of write operations. The model does not allow upward writes of data
 derived from low consistency reads to regions with a higher consistency level.
 However, an implementation may choose to
 allow explicit promotion of low-consistency data to be written into higher
-consistency regions to increase the flexibility of the model.
+consistency regions, to increase the flexibility of the model.
 
 Unlike reads, it is not possible to customize the consistency of write
 operations. This is justified
@@ -212,8 +212,8 @@ application invariants are maintained by concurrent
 operations. If a weaker policy is in fact strong enough to enforce any
 application-specific
 invariants, it should be used as the annotation on the data region itself. 
-These data-centric write restrictions act as data region guards, because they force all writes to go
-though the needed consistency protocol.
+These data-centric write restrictions act as data region guards, because they 
+force all writes to go though the needed consistency protocol.
 
 
 %nesting of sets
@@ -253,19 +253,18 @@ versions of each entity may co-exist, either on different replicas or in local
 client buffers. Each version is assigned a time stamp as well as other metadata 
 that might be needed to enforce a consistency property.
 
-We define a partial order of three consistency levels, eventual
+We define a partial order of three consistency policies, eventual
 consistency (\texttt{EC}) $\prec$ monotonic atomic view (\texttt{MAV})~\cite{bailis2013highly}  $\prec$
 serializability (\texttt{SR}), which apply on the action level. The programming language 
 Quelea~\cite{sivaramakrishnan2015declarative} provides similar
-consistency levels, as well as a proof of order validity. In short, consistency
+consistency policies, as well as a proof of order validity. In short, consistency
 levels are represented as first-order logical predicates; ordering is given
-by entailment: stronger consistency levels entail weaker.
+by entailment: stronger consistency policies entail weaker.
 All variables in our implementation are at least eventually consistent
 \texttt{EC}, which means it
 is possible to freely observe any version of the object (without monotonicity
-guarantees), and
-eventually all versions will converge. A region annotated \texttt{MAV}
-guarantees that all new versions written by an
+guarantees), and eventually all versions will converge. A region annotated 
+\texttt{MAV} guarantees that all new versions written by an
 action are observed together, and that version updates are observed
 monotonically. The \texttt{SR} annotation on a
 region guarantees that the latest version of all
@@ -321,11 +320,11 @@ action orderMysteryProduct(
 
 Figure~\ref{fig:example} shows a simple schema with annotated
 regions and actions. Regions are annotated 
-with their consistency level. For simplicity, regions are simply fields,
+with their consistency policies. For simplicity, regions are simply fields,
 which may be records containing multiple simple fields.
 %
-In this example, the developer requires that \texttt{username}s be 
-unique, hence they are declared as serializable.
+In this example, the developer requires \texttt{username}s to be 
+unique, hence the field \texttt{Customer.username} is declared as serializable.
 It is still possible to read \texttt{username}s at lower
 consistency levels if needed (e.g., if we only need to display the name). 
 \texttt{name} and \texttt{gender} are not very important, even if older
@@ -343,7 +342,7 @@ based on such reads.
 %
 We show only one action \texttt{orderMysteryProduct}. This action does
 not have a single isolation level, as is the case in regular transactions;
-rather, the action manipulates data with many different consistency levels.
+rather, the action manipulates data with many different consistency policies.
 However, we can see the flexibility and safety this approach gives the
 developer. It is possible to read and write at multiple consistency levels
 seamlessly while preserving the consistency requirements of each region.
@@ -355,9 +354,9 @@ reads and updates \texttt{mysteryProduct.amount}, stored in a
 serializable relational database, and also stores operation logs in an eventually consistent,
 key-value store. In addition, actions can signal success
 or failure, and developers have to handle them appropriately. For brevity, we
-omit failure handling details her.
+omit failure handling details here.
 
-% Fixes: I just removed failure handling details. 
+% Fixes: I just removed failure handling details.
 \section{Mapping Data-centric Consistency to Operation-centric Consistency}
 \label{sec:underlyingsys}
 The underlying storage system needed to support annotated regions and actions must
@@ -380,11 +379,12 @@ The data fetched
 is placed in a local cache. Subsequent writes in the action are performed on
 the local cache. When the action completes successfully, a % why do we call them
 %dirty regions?
-\texttt{put\_all} call is issued on dirty regions to write them back to the server. 
+\texttt{put\_all} call is issued on the local cache per region to write them back to the server. 
 %
 \texttt{EC} regions are read and written directly using the baseline protocol, 
 which provides no concurrency control; the LWW semantics of our registers guarantee
 eventual consistency of represented objects. 
+
 The DCCT compiler translates actions to Java methods containing Kaiju calls.
 The generated code can be made more efficient. For instance, specialized 
 program analysis can deduce that  \texttt{SR}  region guarantees can be satisfied 
@@ -426,7 +426,7 @@ coordination. Invariants that are I-confluent can be satisfied without strong
 consistency. 
 % Indigo putting consistency back, i-offender analysis
 An extension of I-confluence is proposed by Balegas et
-al.~\cite{balegas2015putting}, who propose a framework that allows declaring
+al.~\cite{balegas2015putting}, who introduce a framework that allows declaring
 correctness invariants over data. However, the weakest supported consistency
 model is causal consistency, and not all types of invariants can be
 expressed.
@@ -447,17 +447,16 @@ invariants are maintained. Quelea's model reasons about higher-level
 operations (e.g. deposit, withdraw), as opposed to our approach where we reason 
 only about reads and writes. Hence, it is possible in Quelea for operations with
 multiple consistency levels to interact with the same data, while we require 
-operations to follow the consistency policy declared on data. While their 
-approach is more flexible in this sense, it requires keeping track of the entire
+operations to follow the consistency policy declared on data. Their 
+approach is thus more flexible in this sense, however, it requires keeping track of the entire
 history of operations, and describing all ordering and visibility properties among 
 operations accessing the same data.
-\todo{@nate I had removed this earlier because it seemed out of place, what do you
-  think?}
+
 % Adya's mixing theorem
 To reason about the correctness of systems with transactions running at different
 isolation levels, Adya~\cite{adya2000generalized} proposed the mixing
 theorem, which states that in mixing-correct histories, each transaction is provided 
-the guarantees that pertain to its level.The implication is that transactions running 
+the guarantees that pertain to its level. The implication is that transactions running 
 at lower isolation levels must ``know what they are doing'', in terms of application 
 invariants they must preserve, and must update the database consistently even if they observe an
 inconsistent state. Our data-centric approach does not rely on operations
@@ -474,20 +473,20 @@ it requires whole program analysis, and does not attempt to prove that underlyin
 invariants will be maintained, putting it at the hands of the developer to decide 
 on the suitable consistency policy needed for each region. We believe that it is 
 possible to combine our work with ~\cite{gotsman2016cause}
-and ~\cite{balegas2015putting}, to show that developers selection of consistency
+and ~\cite{balegas2015putting}, to show that a developer's selection of consistency
 policies maintains underlying application invariants.
 The data-centric consistency model presented here supports only 
 disjoint regions. We plan to extend the model with support for nesting and merging 
 of regions in the spirit of~\cite{dolby2012data}.
 Temporarily merging regions is useful to avoid higher-level data races~\cite{artho2003high}.
-We plan to survey commonly used simple invariants in data-backed applications to support
+Furthermore, we also plan to survey commonly used simple invariants in data-backed applications to support
 declaring them directly, such as the uniqueness invariant~\cite{bailis2015feral},
-which is easier  and more readable. To prove the soundness of our proposed model and 
-programming language, we will formally specify the region/action model and their
-interactions, as well as the semantics of the proposed language, typing rules
-and operational semantics. Finally a thorough evaluation, through implementing
+which is easier  and more readable. To prove the soundness of the proposed model and 
+programming language, we will formally specify the regions/actions model and their
+interactions, as well as the typing rules and operational semantics of the
+proposed language. Finally, a thorough evaluation, through implementing
 real world applications and benchmarks is necessary to to evaluate the ease of use
-and expressiveness of the language, as well as the performance of the generated
+and expressiveness of the language, as well as the performance of its generated
 code.
 
 %\appendix
