@@ -141,9 +141,9 @@ specifying one of many consistency settings for operations:
 the set of nodes that need to acknowledge the success of an operation. It
 is not immediately clear how consistency levels such as causal consistency or
 linearizability can be achieved, if at all, using these systems. The Cassandra documentation
-states that, to achieve ``strong consistency''\footnote{Strong consistency here implies
-neither linearizability or serializability, as explained 
-in~\cite{sivaramakrishnan2016representation}.} clients must issue quorum reads and writes,
+states that, to achieve ``strong consistency''\footnote{Strong consistency in
+Cassandra implies
+neither linearizability or serializability~\cite{sivaramakrishnan2016representation}.} clients must issue quorum reads and writes,
 however, nothing prevents a misbehaving client from issuing concurrent \texttt{one} writes and
 \texttt{quorum} reads on the same data, thus violating strong consistency for other clients. Another
 problem is when a client issues \texttt{all} reads and writes, which is completely
@@ -161,9 +161,9 @@ consistency settings for operations interacting with
 regions are assigned or restricted accordingly. We
 describe the abstract model in Section~\ref{sec:model}, and in
 Section~\ref{sec:example} we motivate its usefulness in addressing the above 
-issues by showing an example in a prototype language implementing it.
-\footnote{This language is a work in progress. The project that can be found at
-  \url{https://github.com/amanjpro/languages-a-la-carte/}.}.
+issues by showing an example in a prototype language implementing
+it.\footnote{The language is a work in progress. The project that can be found at
+  \url{https://github.com/amanjpro/languages-a-la-carte/}.}
 We describe the mapping between our language's data-centric declarations and 
 underlying operational consistency settings of the target storage system in 
 Section~\ref{sec:underlyingsys}.  In section~\ref{sec:relatedwork}, we overview 
@@ -357,7 +357,7 @@ or failure, and developers have to handle them appropriately. For brevity, we
 omit failure handling details here.
 
 % Fixes: I just removed failure handling details.
-\section{Mapping Data-centric Consistency to Operation-centric Consistency}
+\section{Supporting Data-Centric Consistency}
 \label{sec:underlyingsys}
 The underlying storage system needed to support annotated regions and actions must
 support at least the strongest consistency level, and ideally all consistency
